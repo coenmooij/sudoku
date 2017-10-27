@@ -1,8 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CoenMooij\Sudoku\Generator;
 
-class PuzzleGenerator
+use CoenMooij\Sudoku\DigValidator;
+use CoenMooij\Sudoku\Puzzle\Grid;
+use CoenMooij\Sudoku\Puzzle\Location;
+use CoenMooij\Sudoku\Puzzle\Puzzle;
+
+/**
+ * Class PuzzleGenerator
+ */
+final class PuzzleGenerator
 {
     const DIFFICULTY_LEVELS = [
         ['level' => 1, 'holes' => 30, 'bound' => 5],
@@ -13,7 +23,6 @@ class PuzzleGenerator
     ];
 
     /**
-     * Difficulty level.
      * @var integer
      */
     private $difficulty;
@@ -25,52 +34,50 @@ class PuzzleGenerator
     private $stack;
 
     /**
-     * The sudoku grid.
      * @var Grid
      */
-    private $sudokuGrid;
+    private $grid;
 
     /**
-     * The dig consultant.
-     * @var DigConsultant
+     * @var DigValidator
      */
-    private $digConsultant;
+    private $digValidator;
 
     /**
      * PuzzleGenerator constructor.
      */
-    public function __construct()
+    public function __construct(DigValidator $digValidator)
     {
-        $this->digConsultant = new DigConsultant();
+        $this->digValidator = $digValidator;
     }
 
     /**
      * Generate a sudoku puzzle from a given solution.
      *
-     * @param Grid $sudokuGrid A full sudoku solution.
+     * @param Grid $grid A full sudoku solution.
      * @param integer $difficulty The difficulty level.
      *
-     * @return SudokuPuzzle
+     * @return Puzzle
      */
-    public function generatePuzzle(Grid $sudokuGrid, $difficulty)
+    public function generatePuzzle(Grid $grid, $difficulty): Puzzle
     {
-        $this->sudokuGrid = $sudokuGrid;
+        $this->grid = $grid;
         $this->difficulty = $difficulty;
         $this->populateRandomStack();
         $this->digHoles();
 
-        return new SudokuPuzzle($this->sudokuGrid);
+        return new Puzzle($this->grid);
     }
 
     /**
      * Populates the stack with a list of random cell values.
      * @return void
      */
-    private function populateRandomStack()
+    private function populateRandomStack(): void
     {
         $numberOfHoles = self::DIFFICULTY_LEVELS[$this->difficulty - 1]['holes'];
         for ($i = 0; $i < $numberOfHoles; $i++) {
-            $this->stack[] = ['x' => rand(0, 8), 'y' => rand(0, 8)];
+            $this->stack[] = ['x' => random_int(0, 8), 'y' => random_int(0, 8)];
         }
     }
 
@@ -78,14 +85,14 @@ class PuzzleGenerator
      * Empty all the cells from stack in the grid if possible.
      * @return void
      */
-    private function digHoles()
+    private function digHoles(): void
     {
         $numberOfHoles = self::DIFFICULTY_LEVELS[$this->difficulty - 1]['holes'];
         $bound = self::DIFFICULTY_LEVELS[$this->difficulty - 1]['bound'];
         for ($i = 0; $i < $numberOfHoles; $i++) {
             $location = new Location($this->stack[$i]['y'], $this->stack[$i]['x']);
-            if ($this->digConsultant->isDiggableAndUniquelySolvableAfterDigging($this->sudokuGrid, $location, $bound)) {
-                $this->sudokuGrid->emptyCell($location);
+            if ($this->digValidator->isDiggableAndUniquelySolvableAfterDigging($this->grid, $location, $bound)) {
+                $this->grid->emptyCell($location);
             }
         }
     }

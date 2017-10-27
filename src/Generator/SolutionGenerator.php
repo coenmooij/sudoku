@@ -1,6 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CoenMooij\Sudoku\Generator;
+
+use CoenMooij\Sudoku\Exception\UnsolvableException;
+use CoenMooij\Sudoku\Puzzle\Grid;
+use CoenMooij\Sudoku\Puzzle\Location;
+use CoenMooij\Sudoku\SudokuValidator;
 
 /**
  * Class SolutionGenerator
@@ -13,27 +20,26 @@ class SolutionGenerator
     /**
      * @var Grid
      */
-    private $sudokuGrid;
+    private $grid;
 
     /**
      * @var SudokuValidator
      */
     private $validator;
 
-    // todo proper dependency injection
-    public function __construct()
+    public function __construct(SudokuValidator $sudokuValidator)
     {
-        $this->validator = new SudokuValidator();
+        $this->validator = $sudokuValidator;
     }
 
     public function generateSolution(): Grid
     {
         do {
-            $this->sudokuGrid = new Grid();
+            $this->grid = new Grid();
             $this->placeRandomStarters();
         } while (!$this->sudokuIsSolvable());
 
-        return $this->sudokuGrid;
+        return $this->grid;
     }
 
     private function placeRandomStarters(): void
@@ -41,14 +47,14 @@ class SolutionGenerator
         for ($i = 0; $i < self::NUMBER_OF_RANDOM_STARTERS; $i++) {
             $location = $this->getRandomEmptyCell();
             do {
-                $this->sudokuGrid->setCell($location, random_int(1, 9));
+                $this->grid->setCell($location, random_int(1, 9));
             } while (!$this->isValid());
         }
     }
 
     private function isValid(): bool
     {
-        return $this->validator->validate($this->sudokuGrid);
+        return $this->validator->validate($this->grid);
     }
 
     /**
@@ -59,7 +65,7 @@ class SolutionGenerator
     {
         do {
             $location = new Location(random_int(0, 8), random_int(0, 8));
-        } while ($this->sudokuGrid->isEmpty($location));
+        } while ($this->grid->isEmpty($location));
 
         return $location;
     }
@@ -68,8 +74,7 @@ class SolutionGenerator
     {
         $solver = new BacktrackSolver();
         try {
-            $solver->solve($this->sudokuGrid);
-
+            $solver->solve($this->grid);
             return true;
         } catch (UnsolvableException $exception) {
             return false;

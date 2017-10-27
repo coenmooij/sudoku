@@ -37,7 +37,7 @@ class Puzzle
     {
         for ($row = 0; $row < 9; $row++) {
             for ($column = 0; $column < 9; $column++) {
-                $value = $grid->getCell($row, $column);
+                $value = $grid->getCellValue($row, $column);
                 $this->puzzle[$row][$column] = [
                     'given' => $value > 0,
                     'value' => $value,

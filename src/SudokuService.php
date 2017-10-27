@@ -55,11 +55,11 @@ class SudokuService
             throw new BadRequestHttpException('Invalid parameter `solution`.');
         }
         $sudokuParser = new SudokuParser();
-        $sudokuGrid = $sudokuParser->parse($solution);
+        $grid = $sudokuParser->parse($solution);
 
         $validator = new SudokuValidator();
-        if ($validator->validate($sudokuGrid)) {
-            $numberOfEmptyFields = $validator->numberOfEmptyFields($sudokuGrid);
+        if ($validator->validate($grid)) {
+            $numberOfEmptyFields = Grid::numberOfEmptyFields($grid);
             if ($numberOfEmptyFields > 0) {
                 $message = "Going great! You still have " . $numberOfEmptyFields . " cells to fill.";
             } else {

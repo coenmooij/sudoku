@@ -1,56 +1,48 @@
 <?php
 
-namespace CoenMooij\Sudoku;
+declare(strict_types=1);
+
+namespace CoenMooij\Sudoku\Validator;
+
+use CoenMooij\Sudoku\Puzzle\Grid;
 
 /**
  * Class SudokuValidator
  */
-class SudokuValidator
+final class SudokuValidator
 {
-    /**
-     * The sudokuGrid.
-     * @var Grid
-     */
-    private $sudokuGrid;
+    const ALL_VALID_VALUES = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
     /**
-     * Validates a sudoku grid. Checks if no invalid fields are filled.
+     * @param Grid $grid
      *
-     * @param Grid $sudokuGrid The sudoku to be validated.
-     *
-     * @return boolean
+     * @return bool
      */
-    public function validate(Grid $sudokuGrid): bool
+    public static function validate(Grid $grid): bool
     {
-        $this->sudokuGrid = $sudokuGrid;
-
-        return $this->validateColumns() && $this->validateRows() && $this->validateBlocks();
+        return self::columnsAreValid($grid) && self::rowsAreValid($grid) && self::blocksAreValid($grid);
     }
 
     /**
-     * Counts and returns the number of empty ('0') fields.
+     * @param int $value
      *
-     * @param Grid $sudokuGrid The sudoku grid.
-     *
-     * @return integer
+     * @return bool
      */
-    public function numberOfEmptyFields(Grid $sudokuGrid)
+    public static function valueIsValid(int $value): bool
     {
-        $gridAsString = $sudokuGrid->getGridAsString();
-
-        return substr_count($gridAsString, '0');
     }
 
     /**
-     * Validates all rows.
-     * @return boolean
+     * @param Grid $grid
+     *
+     * @return bool
      */
-    private function validateRows()
+    public static function rowsAreValid(Grid $grid): bool
     {
-        for ($i = 0; $i < 9; $i++) {
-            $row = $this->sudokuGrid->getRow($i);
-            if (!$this->validateSet($row)) {
-                return false; // Returns as soon as any set fails to improve performance
+        for ($i = 0; $i < Grid::NUMBER_OF_ROWS; $i++) {
+            $row = $grid->getRow($i);
+            if (self::hasDuplicates($row)) {
+                return false;
             }
         }
 
@@ -58,15 +50,15 @@ class SudokuValidator
     }
 
     /**
-     * Validates all columns.
-     * @return boolean
+     * @param Grid $grid
+     *
+     * @return bool
      */
-    private function validateColumns()
+    public static function columnsAreValid(Grid $grid): bool
     {
-        for ($i = 0; $i < 9; $i++) {
-            $column = $this->sudokuGrid->getColumn($i);
-            if (!$this->validateSet($column)) {
-                return false; // Returns as soon as any set fails to improve performance
+        for ($i = 0; $i < Grid::NUMBER_OF_COLUMNS; $i++) {
+            if (self::hasDuplicates($grid->getColumn($i))) {
+                return false;
             }
         }
 
@@ -74,15 +66,16 @@ class SudokuValidator
     }
 
     /**
-     * Validates all 3x3 blocks in the grid.
-     * @return boolean
+     * @param Grid $grid
+     *
+     * @return bool
      */
-    private function validateBlocks()
+    public function blocksAreValid(Grid $grid): bool
     {
-        for ($i = 0; $i < 9; $i++) {
-            $block = $this->sudokuGrid->getBlockByNumber($i);
-            if (!$this->validateSet($block)) {
-                return false; // Returns as soon as any set fails to improve performance
+        for ($i = 0; $i < Grid::NUMBER_OF_BLOCKS; $i++) {
+            $block = $grid->getBlockByNumber($i);
+            if (self::hasDuplicates($block)) {
+                return false;
             }
         }
 
@@ -90,21 +83,14 @@ class SudokuValidator
     }
 
     /**
-     * Validates a set, checks whether there are no duplicates (except 0 = empty)
+     * @param array $values
      *
-     * @param array $set The set of numbers to be validated.
-     *
-     * @return boolean
+     * @return bool
      */
-    private function validateSet(array $set)
+    private static function hasDuplicates(array $values): bool
     {
-        $set = array_diff($set, [0]);
-        if (count(array_unique($set)) < count($set)) {
-            $response = false;
-        } else {
-            $response = true;
-        }
+        $values = array_diff($values, [Grid::EMPTY_CELL]);
 
-        return $response;
+        return count(array_count_values($values)) !== count($values);
     }
 }

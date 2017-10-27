@@ -2,8 +2,8 @@
 
 namespace CoenMooij\Sudoku\Solver;
 
-use CoenMooij\Sudoku\Location;
-use CoenMooij\Sudoku\Grid;
+use CoenMooij\Sudoku\Puzzle\Grid;
+use CoenMooij\Sudoku\Puzzle\Location;
 
 /**
  * Solves the given sudoku using only row, column, and block checks.
@@ -11,15 +11,15 @@ use CoenMooij\Sudoku\Grid;
  */
 class SimpleSolver implements SudokuSolverInterface
 {
-    public function solve(Grid $sudokuGrid): Grid
+    public function solve(Grid $grid): Grid
     {
         for ($row = 0; $row < 9; $row++) {
             for ($column = 0; $column < 9; $column++) {
                 $location = new Location($row, $column);
-                if ($sudokuGrid->getCell($location) === 0) {
-                    $opportunities = $sudokuGrid->possibilitiesForCell($location);
+                if ($grid->getCellValue($location) === 0) {
+                    $opportunities = $grid->possibilitiesForCell($location);
                     if (count($opportunities) === 1) {
-                        $sudokuGrid->setCell($location, $opportunities[0]);
+                        $grid->setCell($location, $opportunities[0]);
                         $column = 0;
                         $row = 0;
                     }
@@ -27,6 +27,6 @@ class SimpleSolver implements SudokuSolverInterface
             }
         }
 
-        return $sudokuGrid;
+        return $grid;
     }
 }

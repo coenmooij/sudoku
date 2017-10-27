@@ -1,18 +1,20 @@
 <?php
 
-namespace CoenMooij\Sudoku;
+namespace CoenMooij\Sudoku\Validator;
+
+use CoenMooij\Sudoku\Solver\SudokuSolverInterface;
 
 class DigValidator
 {
     /**
-     * @var SudokuSolverInterface
+     * @var BacktrackSolver
      */
     private $solver;
 
     // Todo proper dependency injection
-    public function __construct()
+    public function __construct(BacktrackSolver $solver)
     {
-        $this->solver = new BacktrackSolver();
+        $this->solver = $solver;
     }
 
     public function isDiggableAndUniquelySolvableAfterDigging(
