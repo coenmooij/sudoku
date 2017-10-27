@@ -9,18 +9,18 @@ class SudokuValidator
 {
     /**
      * The sudokuGrid.
-     * @var SudokuGrid
+     * @var Grid
      */
     private $sudokuGrid;
 
     /**
      * Validates a sudoku grid. Checks if no invalid fields are filled.
      *
-     * @param SudokuGrid $sudokuGrid The sudoku to be validated.
+     * @param Grid $sudokuGrid The sudoku to be validated.
      *
      * @return boolean
      */
-    public function validate(SudokuGrid $sudokuGrid): bool
+    public function validate(Grid $sudokuGrid): bool
     {
         $this->sudokuGrid = $sudokuGrid;
 
@@ -30,11 +30,11 @@ class SudokuValidator
     /**
      * Counts and returns the number of empty ('0') fields.
      *
-     * @param SudokuGrid $sudokuGrid The sudoku grid.
+     * @param Grid $sudokuGrid The sudoku grid.
      *
      * @return integer
      */
-    public function numberOfEmptyFields(SudokuGrid $sudokuGrid)
+    public function numberOfEmptyFields(Grid $sudokuGrid)
     {
         $gridAsString = $sudokuGrid->getGridAsString();
 

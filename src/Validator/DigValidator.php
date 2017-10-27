@@ -2,7 +2,7 @@
 
 namespace CoenMooij\Sudoku;
 
-class DigConsultant
+class DigValidator
 {
     /**
      * @var SudokuSolverInterface
@@ -16,15 +16,15 @@ class DigConsultant
     }
 
     public function isDiggableAndUniquelySolvableAfterDigging(
-        SudokuGrid $sudokuGrid,
-        GridLocation $location,
+        Grid $sudokuGrid,
+        Location $location,
         int $bound
     ): bool {
         return $this->cellIsDiggable($sudokuGrid, $location, $bound)
             && $this->cellIsUniquelySolvableAfterDigging($sudokuGrid, $location);
     }
 
-    private function cellIsDiggable(SudokuGrid $grid, GridLocation $location, int $bound): bool
+    private function cellIsDiggable(Grid $grid, Location $location, int $bound): bool
     {
         return $bound <= 0 || (
                 $this->rowIsDiggable($grid, $location, $bound)
@@ -33,7 +33,7 @@ class DigConsultant
             );
     }
 
-    private function cellIsUniquelySolvableAfterDigging(SudokuGrid $grid, GridLocation $location): bool
+    private function cellIsUniquelySolvableAfterDigging(Grid $grid, Location $location): bool
     {
         $originalValue = $grid->getCell($location);
         $gridCopy = clone $grid;
@@ -52,21 +52,21 @@ class DigConsultant
         return true;
     }
 
-    private function rowIsDiggable(SudokuGrid $grid, GridLocation $location, int $bound): bool
+    private function rowIsDiggable(Grid $grid, Location $location, int $bound): bool
     {
         $row = $grid->getRow($location->getRow());
 
         return $this->sectionIsDiggable($row, $bound);
     }
 
-    private function columnIsDiggable(SudokuGrid $grid, GridLocation $location, int $bound): bool
+    private function columnIsDiggable(Grid $grid, Location $location, int $bound): bool
     {
         $column = $grid->getColumn($location->getColumn());
 
         return $this->sectionIsDiggable($column, $bound);
     }
 
-    private function blockIsDiggable(SudokuGrid $grid, GridLocation $location, int $bound): bool
+    private function blockIsDiggable(Grid $grid, Location $location, int $bound): bool
     {
         $block = $grid->getBlock($location);
 
@@ -80,6 +80,6 @@ class DigConsultant
 
     private function numberOfFilledInCells(array $cells): int
     {
-        return count(array_diff($cells, [SudokuGrid::EMPTY_CELL]));
+        return count(array_diff($cells, [Grid::EMPTY_CELL]));
     }
 }

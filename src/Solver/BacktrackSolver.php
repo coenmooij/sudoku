@@ -2,7 +2,7 @@
 
 namespace CoenMooij\Sudoku\Solver;
 
-use CoenMooij\Sudoku\SudokuGrid;
+use CoenMooij\Sudoku\Grid;
 
 /**
  * BacktrackSolver - Informed depth first search.
@@ -35,7 +35,7 @@ class BacktrackSolver implements SudokuSolverInterface
     private $possibilities;
 
     /**
-     * @var SudokuGrid
+     * @var Grid
      */
     private $sudokuGrid;
 
@@ -65,12 +65,12 @@ class BacktrackSolver implements SudokuSolverInterface
     /**
      * Solves the given grid.
      *
-     * @param SudokuGrid $sudokuGrid The grid to solve.
+     * @param Grid $sudokuGrid The grid to solve.
      *
-     * @return SudokuGrid
+     * @return Grid
      * @throws \CoenMooij\Sudoku\UnsolvableException
      */
-    public function solve(SudokuGrid $sudokuGrid): SudokuGrid
+    public function solve(Grid $sudokuGrid): Grid
     {
         $this->initializeSolveGrid($sudokuGrid);
         while (!$this->reachedFinalCell()) {
@@ -208,7 +208,7 @@ class BacktrackSolver implements SudokuSolverInterface
         $this->possibilities[$location->getRow()][$location->getColumn()] = $possibilities;
     }
 
-    private function initializeSolveGrid(SudokuGrid $sudokuGrid): void
+    private function initializeSolveGrid(Grid $sudokuGrid): void
     {
         $this->reset();
         $this->sudokuGrid = $sudokuGrid;
@@ -229,7 +229,7 @@ class BacktrackSolver implements SudokuSolverInterface
 
     private function isFilledIn(GridLocation $location): bool
     {
-        return $this->sudokuGrid->getCell($location) !== SudokuGrid::EMPTY_CELL;
+        return $this->sudokuGrid->getCell($location) !== Grid::EMPTY_CELL;
     }
 
     /**

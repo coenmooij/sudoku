@@ -19,7 +19,7 @@ class SudokuService
         // todo implement
     }
 
-    public function simpleSolve(SudokuPuzzle $sudokuPuzzle): SudokuPuzzle
+    public function simpleSolve(Puzzle $sudokuPuzzle): Puzzle
     {
         // todo implement
     }
