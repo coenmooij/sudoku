@@ -7,14 +7,14 @@ namespace CoenMooij\Sudoku\Generator;
 use CoenMooij\Sudoku\Exception\UnsolvableException;
 use CoenMooij\Sudoku\Puzzle\Grid;
 use CoenMooij\Sudoku\Puzzle\Location;
-use CoenMooij\Sudoku\SudokuValidator;
+use CoenMooij\Sudoku\Solver\BacktrackSolver;
+use CoenMooij\Sudoku\Validator\GridValidator;
 
 /**
  * Class SolutionGenerator
  */
-class SolutionGenerator
+final class SolutionGenerator
 {
-    // todo make configurable
     const NUMBER_OF_RANDOM_STARTERS = 11;
 
     /**
@@ -23,58 +23,66 @@ class SolutionGenerator
     private $grid;
 
     /**
-     * @var SudokuValidator
+     * @var BacktrackSolver
      */
-    private $validator;
+    private $solver;
 
-    public function __construct(SudokuValidator $sudokuValidator)
+    /**
+     * SolutionGenerator constructor.
+     *
+     * @param BacktrackSolver $solver
+     */
+    public function __construct(BacktrackSolver $solver)
     {
-        $this->validator = $sudokuValidator;
+        $this->solver = $solver;
     }
 
+    /**
+     * @return Grid
+     */
     public function generateSolution(): Grid
     {
         do {
             $this->grid = new Grid();
             $this->placeRandomStarters();
-        } while (!$this->sudokuIsSolvable());
+        } while (!$this->gridIsSolvable());
 
         return $this->grid;
     }
 
+    /**
+     * @return void
+     */
     private function placeRandomStarters(): void
     {
         for ($i = 0; $i < self::NUMBER_OF_RANDOM_STARTERS; $i++) {
-            $location = $this->getRandomEmptyCell();
+            $location = $this->getRandomEmptyLocation();
             do {
                 $this->grid->setCell($location, random_int(1, 9));
-            } while (!$this->isValid());
+            } while (!GridValidator::gridIsValid($this->grid));
         }
     }
 
-    private function isValid(): bool
-    {
-        return $this->validator->validate($this->grid);
-    }
-
     /**
-     * Returns a random currently empty cell.
-     * @return array
+     * @return Location
      */
-    private function getRandomEmptyCell(): Location
+    private function getRandomEmptyLocation(): Location
     {
         do {
             $location = new Location(random_int(0, 8), random_int(0, 8));
-        } while ($this->grid->isEmpty($location));
+        } while (!$this->grid->getCell($location)->isEmpty());
 
         return $location;
     }
 
-    private function sudokuIsSolvable(): bool
+    /**
+     * @return bool
+     */
+    private function gridIsSolvable(): bool
     {
-        $solver = new BacktrackSolver();
         try {
-            $solver->solve($this->grid);
+            $this->solver->solve($this->grid);
+
             return true;
         } catch (UnsolvableException $exception) {
             return false;

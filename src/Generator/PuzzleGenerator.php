@@ -4,35 +4,18 @@ declare(strict_types=1);
 
 namespace CoenMooij\Sudoku\Generator;
 
-use CoenMooij\Sudoku\DigValidator;
+use CoenMooij\Sudoku\Puzzle\Cell;
+use CoenMooij\Sudoku\Puzzle\Difficulty;
 use CoenMooij\Sudoku\Puzzle\Grid;
 use CoenMooij\Sudoku\Puzzle\Location;
 use CoenMooij\Sudoku\Puzzle\Puzzle;
+use CoenMooij\Sudoku\Validator\DigValidator;
 
 /**
  * Class PuzzleGenerator
  */
 final class PuzzleGenerator
 {
-    const DIFFICULTY_LEVELS = [
-        ['level' => 1, 'holes' => 30, 'bound' => 5],
-        ['level' => 2, 'holes' => 40, 'bound' => 4],
-        ['level' => 3, 'holes' => 50, 'bound' => 3],
-        ['level' => 4, 'holes' => 60, 'bound' => 2],
-        ['level' => 5, 'holes' => 70, 'bound' => 0],
-    ];
-
-    /**
-     * @var integer
-     */
-    private $difficulty;
-
-    /**
-     * A list of cell locations to be dug out.
-     * @var array
-     */
-    private $stack;
-
     /**
      * @var Grid
      */
@@ -45,6 +28,8 @@ final class PuzzleGenerator
 
     /**
      * PuzzleGenerator constructor.
+     *
+     * @param DigValidator $digValidator
      */
     public function __construct(DigValidator $digValidator)
     {
@@ -52,48 +37,69 @@ final class PuzzleGenerator
     }
 
     /**
-     * Generate a sudoku puzzle from a given solution.
-     *
-     * @param Grid $grid A full sudoku solution.
-     * @param integer $difficulty The difficulty level.
+     * @param Grid $solvedGrid
+     * @param Difficulty $difficulty
      *
      * @return Puzzle
      */
-    public function generatePuzzle(Grid $grid, $difficulty): Puzzle
+    public function generatePuzzle(Grid $solvedGrid, Difficulty $difficulty): Puzzle
     {
-        $this->grid = $grid;
-        $this->difficulty = $difficulty;
-        $this->populateRandomStack();
-        $this->digHoles();
+        $this->grid = $solvedGrid;
+        $locationList = $this->getRandomLocations($difficulty);
+        $this->digLocations($difficulty, ...$locationList);
 
         return new Puzzle($this->grid);
     }
 
     /**
-     * Populates the stack with a list of random cell values.
-     * @return void
+     * @param Difficulty $difficulty
+     *
+     * @return array|Location[]
      */
-    private function populateRandomStack(): void
+    private function getRandomLocations(Difficulty $difficulty): array
     {
-        $numberOfHoles = self::DIFFICULTY_LEVELS[$this->difficulty - 1]['holes'];
+        $locationList = [];
+        $numberOfHoles = $difficulty->getNumberOfHoles();
         for ($i = 0; $i < $numberOfHoles; $i++) {
-            $this->stack[] = ['x' => random_int(0, 8), 'y' => random_int(0, 8)];
+            do {
+                $location = new Location(random_int(0, 8), random_int(0, 8));
+            } while ($this->locationInList($location, $locationList));
+
+            $locationList[] = new Location(random_int(0, 8), random_int(0, 8));// todo fix bug of duplicates
+        }
+
+        return $locationList;
+    }
+
+    /**
+     * @param Difficulty $difficulty
+     * @param Location[] ...$locationList
+     */
+    private function digLocations(Difficulty $difficulty, Location ...$locationList): void
+    {
+        $bound = $difficulty->getBound();
+
+        foreach ($locationList as $location) {
+            if ($this->digValidator->isDiggableAndUniquelySolvableAfterDigging($this->grid, $location, $bound)) {
+                $this->grid->setCell($location, Cell::EMPTY_VALUE);
+            }
         }
     }
 
     /**
-     * Empty all the cells from stack in the grid if possible.
-     * @return void
+     * @param Location $needle
+     * @param Location[] $locationList
+     *
+     * @return bool
      */
-    private function digHoles(): void
+    private function locationInList(Location $needle, Location ...$locationList): bool
     {
-        $numberOfHoles = self::DIFFICULTY_LEVELS[$this->difficulty - 1]['holes'];
-        $bound = self::DIFFICULTY_LEVELS[$this->difficulty - 1]['bound'];
-        for ($i = 0; $i < $numberOfHoles; $i++) {
-            $location = new Location($this->stack[$i]['y'], $this->stack[$i]['x']);
-            if ($this->digValidator->isDiggableAndUniquelySolvableAfterDigging($this->grid, $location, $bound)) {
-                $this->grid->emptyCell($location);
+        foreach ($locationList as $location) {
+            if (Location::match($needle, $location)) {
+                return true;
             }
         }
+
+        return false;
     }
 }

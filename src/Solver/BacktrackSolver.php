@@ -1,11 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CoenMooij\Sudoku\Solver;
 
 use CoenMooij\Sudoku\Exception\UnsolvableException;
+use CoenMooij\Sudoku\Puzzle\Cell;
 use CoenMooij\Sudoku\Puzzle\Grid;
 use CoenMooij\Sudoku\Puzzle\Location;
-use CoenMooij\Sudoku\Validator\SudokuValidator;
+use CoenMooij\Sudoku\Validator\GridValidator;
 
 /**
  * BacktrackSolver - Informed depth first search.
@@ -83,14 +86,14 @@ class BacktrackSolver implements SudokuSolverInterface
                     if ($this->currentLocationHasPossibilities()) {
                         $this->fillCell();
                     } else {
-                        $this->emptyCell();
+                        $this->emptyCurrentCell();
                     }
                 } else {
                     $this->findAndSetAllPossibilitiesForCurrentCell();
                     if ($this->currentLocationHasPossibilities()) {
                         $this->fillCell();
                     } else {
-                        $this->emptyCell();
+                        $this->emptyCurrentCell();
                         $this->direction = self::DIRECTION_BACKWARDS;
                     }
                 }
@@ -107,12 +110,11 @@ class BacktrackSolver implements SudokuSolverInterface
     }
 
     /**
-     * Empties the current cell.
      * @return void
      */
-    private function emptyCell()
+    private function emptyCurrentCell(): void
     {
-        $this->grid->emptyCell(new Location($this->row, $this->column));
+        $this->grid->setCell($this->getCurrentLocation(), Cell::EMPTY_VALUE);
     }
 
     private function reachedFinalCell(): bool
@@ -195,11 +197,11 @@ class BacktrackSolver implements SudokuSolverInterface
             array_merge(
                 $this->grid->getRow($location->getRow()),
                 $this->grid->getColumn($location->getColumn()),
-                $this->grid->getBlock($location)
+                $this->grid->getBlockByLocation($location)
             )
         );
 
-        return array_values(array_diff(SudokuValidator::ALL_VALID_VALUES, $impossibilities));
+        return array_values(array_diff(GridValidator::ALL_VALID_VALUES, $impossibilities));
     }
 
     private function getPossibilitiesFor(Location $location): array
@@ -233,7 +235,7 @@ class BacktrackSolver implements SudokuSolverInterface
      */
     private function isFilledIn(Location $location): bool
     {
-        return $this->grid->getCellValue($location) !== Grid::EMPTY_CELL;
+        return $this->grid->getCellValue($location) !== Cell::EMPTY_VALUE;
     }
 
     /**

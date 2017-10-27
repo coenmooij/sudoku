@@ -2,9 +2,6 @@
 
 namespace CoenMooij\Sudoku\Exception;
 
-/**
- * Class UnsolvableException
- */
-class UnsolvableException extends SudokuException
+final class UnsolvableException extends SudokuException
 {
 }

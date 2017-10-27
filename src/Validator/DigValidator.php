@@ -1,9 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CoenMooij\Sudoku\Validator;
 
-use CoenMooij\Sudoku\Solver\SudokuSolverInterface;
+use CoenMooij\Sudoku\Exception\UnsolvableException;
+use CoenMooij\Sudoku\Puzzle\Cell;
+use CoenMooij\Sudoku\Puzzle\Grid;
+use CoenMooij\Sudoku\Puzzle\Location;
+use CoenMooij\Sudoku\Solver\BacktrackSolver;
 
+/**
+ * Class DigValidator
+ */
 class DigValidator
 {
     /**
@@ -11,12 +20,23 @@ class DigValidator
      */
     private $solver;
 
-    // Todo proper dependency injection
+    /**
+     * DigValidator constructor.
+     *
+     * @param BacktrackSolver $solver
+     */
     public function __construct(BacktrackSolver $solver)
     {
         $this->solver = $solver;
     }
 
+    /**
+     * @param Grid $sudokuGrid
+     * @param Location $location
+     * @param int $bound
+     *
+     * @return bool
+     */
     public function isDiggableAndUniquelySolvableAfterDigging(
         Grid $sudokuGrid,
         Location $location,
@@ -26,6 +46,13 @@ class DigValidator
             && $this->cellIsUniquelySolvableAfterDigging($sudokuGrid, $location);
     }
 
+    /**
+     * @param Grid $grid
+     * @param Location $location
+     * @param int $bound
+     *
+     * @return bool
+     */
     private function cellIsDiggable(Grid $grid, Location $location, int $bound): bool
     {
         return $bound <= 0 || (
@@ -35,9 +62,15 @@ class DigValidator
             );
     }
 
+    /**
+     * @param Grid $grid
+     * @param Location $location
+     *
+     * @return bool
+     */
     private function cellIsUniquelySolvableAfterDigging(Grid $grid, Location $location): bool
     {
-        $originalValue = $grid->getCell($location);
+        $originalValue = $grid->getCellValue($location);
         $gridCopy = clone $grid;
         $gridCopy->emptyCell($location);
         $possibilities = $gridCopy->possibilitiesForCell($location);
@@ -45,7 +78,9 @@ class DigValidator
             $possibilities = array_diff($possibilities, [$originalValue]);
             foreach ($possibilities as $possibility) {
                 $gridCopy->setCell($location, $possibility);
-                if ($this->solver->solve($gridCopy)) {
+                try {
+                    $this->solver->solve($gridCopy);
+                } catch (UnsolvableException $exception) {
                     return false;
                 }
             }
@@ -54,6 +89,13 @@ class DigValidator
         return true;
     }
 
+    /**
+     * @param Grid $grid
+     * @param Location $location
+     * @param int $bound
+     *
+     * @return bool
+     */
     private function rowIsDiggable(Grid $grid, Location $location, int $bound): bool
     {
         $row = $grid->getRow($location->getRow());
@@ -61,6 +103,13 @@ class DigValidator
         return $this->sectionIsDiggable($row, $bound);
     }
 
+    /**
+     * @param Grid $grid
+     * @param Location $location
+     * @param int $bound
+     *
+     * @return bool
+     */
     private function columnIsDiggable(Grid $grid, Location $location, int $bound): bool
     {
         $column = $grid->getColumn($location->getColumn());
@@ -68,20 +117,38 @@ class DigValidator
         return $this->sectionIsDiggable($column, $bound);
     }
 
+    /**
+     * @param Grid $grid
+     * @param Location $location
+     * @param int $bound
+     *
+     * @return bool
+     */
     private function blockIsDiggable(Grid $grid, Location $location, int $bound): bool
     {
-        $block = $grid->getBlock($location);
+        $block = $grid->getBlockByLocation($location);
 
         return $this->sectionIsDiggable($block, $bound);
     }
 
+    /**
+     * @param array $cells
+     * @param int $bound
+     *
+     * @return bool
+     */
     private function sectionIsDiggable(array $cells, int $bound): bool
     {
         return $this->numberOfFilledInCells($cells) > ($bound - 1);
     }
 
+    /**
+     * @param array $cells
+     *
+     * @return int
+     */
     private function numberOfFilledInCells(array $cells): int
     {
-        return count(array_diff($cells, [Grid::EMPTY_CELL]));
+        return count(array_diff($cells, [Cell::EMPTY_VALUE]));
     }
 }

@@ -4,32 +4,22 @@ declare(strict_types=1);
 
 namespace CoenMooij\Sudoku\Validator;
 
+use CoenMooij\Sudoku\Puzzle\Cell;
 use CoenMooij\Sudoku\Puzzle\Grid;
 
 /**
  * Class SudokuValidator
  */
-final class SudokuValidator
+final class GridValidator
 {
-    const ALL_VALID_VALUES = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-
     /**
      * @param Grid $grid
      *
      * @return bool
      */
-    public static function validate(Grid $grid): bool
+    public static function gridIsValid(Grid $grid): bool
     {
         return self::columnsAreValid($grid) && self::rowsAreValid($grid) && self::blocksAreValid($grid);
-    }
-
-    /**
-     * @param int $value
-     *
-     * @return bool
-     */
-    public static function valueIsValid(int $value): bool
-    {
     }
 
     /**
@@ -70,10 +60,9 @@ final class SudokuValidator
      *
      * @return bool
      */
-    public function blocksAreValid(Grid $grid): bool
+    public static function blocksAreValid(Grid $grid): bool
     {
-        for ($i = 0; $i < Grid::NUMBER_OF_BLOCKS; $i++) {
-            $block = $grid->getBlockByNumber($i);
+        foreach ($grid->getAllBlocks() as $block) {
             if (self::hasDuplicates($block)) {
                 return false;
             }
@@ -89,7 +78,7 @@ final class SudokuValidator
      */
     private static function hasDuplicates(array $values): bool
     {
-        $values = array_diff($values, [Grid::EMPTY_CELL]);
+        $values = array_diff($values, [Cell::EMPTY_VALUE]);
 
         return count(array_count_values($values)) !== count($values);
     }

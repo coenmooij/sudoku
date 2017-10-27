@@ -2,9 +2,6 @@
 
 namespace CoenMooij\Sudoku\Exception;
 
-/**
- * Class NoPossibilitiesException
- */
-class NoPossibilitiesException extends SudokuException
+final class NoPossibilitiesException extends SudokuException
 {
 }

@@ -14,6 +14,21 @@ use LengthException;
 final class GridSerializer
 {
     /**
+     * @param Grid $grid
+     *
+     * @return string
+     */
+    public static function serialize(Grid $grid): string
+    {
+        $string = '';
+        for ($i = 0; $i < Grid::NUMBER_OF_CELLS; $i++) {
+            $string .= (string) $grid->getCellValue(Grid::getLocationByIndex($i));
+        }
+
+        return $string;
+    }
+
+    /**
      * @param string $string
      *
      * @return Grid
@@ -32,20 +47,5 @@ final class GridSerializer
         }
 
         return new Grid($cells);
-    }
-
-    /**
-     * @param Grid $grid
-     *
-     * @return string
-     */
-    public static function serialize(Grid $grid): string
-    {
-        $string = '';
-        for ($i = 0; $i < Grid::NUMBER_OF_CELLS; $i++) {
-            $string .= (string) $grid->getCellValue(Grid::getLocationByIndex($i));
-        }
-
-        return $string;
     }
 }

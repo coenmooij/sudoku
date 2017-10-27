@@ -1,19 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CoenMooij\Sudoku\Puzzle;
 
-use CoenMooij\Sudoku\Parser\GridSerializer;
+use CoenMooij\Sudoku\Exception\NoPossibilitiesException;
 
 /**
  * Class Grid
  */
-class Grid
+final class Grid
 {
     public const NUMBER_OF_ROWS = 9;
     public const NUMBER_OF_COLUMNS = 9;
     public const NUMBER_OF_BLOCKS = 9;
     public const NUMBER_OF_CELLS = 81;
-    public const EMPTY_CELL = 0;
+
+    public const EMPTY_VALUE = 0;
 
     /**
      * @var int[][]
@@ -21,15 +24,17 @@ class Grid
     private $grid;
 
     /**
-     * Todo : find better solution to calculate it without serializer
-     *
-     * @param Grid $grid
-     *
-     * @return int
+     * @var Cell[]
      */
-    public static function numberOfEmptyFields(Grid $grid): int
+    private $cells;
+
+    /**
+     * @param Cell[] $cells
+     * Grid constructor.
+     */
+    public function __construct(Cell ...$cells)
     {
-        return substr_count(GridSerializer::serialize($grid), (string) Grid::EMPTY_CELL);
+        $this->cells = $cells;
     }
 
     /**
@@ -39,36 +44,10 @@ class Grid
      */
     public static function getLocationByIndex(int $index): Location
     {
-        $row = floor($index / Grid::NUMBER_OF_COLUMNS);
-        $column = $index % Grid::NUMBER_OF_ROWS;
+        $row = (int) floor($index / self::NUMBER_OF_COLUMNS);
+        $column = $index % self::NUMBER_OF_ROWS;
 
         return new Location($row, $column);
-    }
-
-    /**
-     * @param Cell[] $cells
-     * Grid constructor.
-     */
-    public function __construct(array $cells = [])
-    {
-        $this->initializeEmptyGrid();
-        foreach ($cells as $cell) {
-            $this->setCell($cell->getLocation(), $cell->getValue());
-        }
-    }
-
-    /**
-     * @return void
-     */
-    private function initializeEmptyGrid(): void
-    {
-        $grid = [];
-        for ($i = 0; $i < 9; $i++) {
-            for ($j = 0; $j < 9; $j++) {
-                $grid[$i][$j] = self::EMPTY_CELL;
-            }
-        }
-        $this->grid = $grid;
     }
 
     /**
@@ -82,7 +61,20 @@ class Grid
             && $location->getColumn() >= 0 && $location->getColumn() < 9;
     }
 
+    /**
+     * @return int
+     */
+    public function numberOfEmptyFields(): int
+    {
+        return self::NUMBER_OF_CELLS - count($this->cells);
+    }
+
     public function getCellValue(Location $location): int
+    {
+        return $this->grid[$location->getRow()][$location->getColumn()];
+    }
+
+    public function getCell(Location $location): Cell
     {
         return $this->grid[$location->getRow()][$location->getColumn()];
     }
@@ -95,70 +87,62 @@ class Grid
     }
 
     /**
-     * Setter for the internal grid.
+     * @param int $row
      *
-     * @param array $grid The new grid.
+     * @return int[]
      */
-    public function setGrid($grid): void
+    public function getRow(int $row): array
     {
-        $this->grid = $grid;
+        return $this->grid[$row];
     }
 
     /**
-     * Getter for the grid.
-     * @return array
+     * @param int $column
+     *
+     * @return int[]
      */
-    public function getGrid(): Grid
+    public function getColumn(int $column): array
     {
-        return $this->grid;
-    }
-
-    /**
-     * Returns given row of the grid.
-     *
-     * @param integer $rowNumber The row number.
-     *
-     * @return array
-     */
-    public function getRow(int $rowNumber)
-    {
-        return $this->grid[$rowNumber];
-    }
-
-    /**
-     * Returns a given column.
-     *
-     * @param integer $column The column number.
-     *
-     * @return array
-     */
-    public function getColumn(int $column)
-    {
-        $response = [];
+        $values = [];
         for ($row = 0; $row < 9; $row++) {
-            $response[] = $this->getCellValue($row, $column);
+            $values[] = $this->getCellValue(new Location($row, $column));
         }
 
-        return $response;
+        return $values;
     }
 
     /**
-     * Returns block by number (ltr,ttb) (0-8)
+     * @return int[][]
+     */
+    public function getAllBlocks(): array
+    {
+        $blocks = [];
+        for ($i = 0; $i < self::NUMBER_OF_BLOCKS; $i++) {
+            $blocks[] = $this->getBlockByNumber($i);
+        }
+
+        return $blocks;
+    }
+
+    /**
+     * @param integer $block
      *
-     * @param integer $blockNumber The block number.
+     * @return int[]
+     */
+    public function getBlockByNumber(int $block): array
+    {
+        $row = $block - ($block % 3);
+        $column = ($block % 3) * 3;
+
+        return $this->getBlockByLocation(new Location($row, $column));
+    }
+
+    /**
+     * @param Location $location
      *
      * @return array
      */
-    public function getBlockByNumber(int $blockNumber)
-    {
-        $mod3 = $blockNumber % 3;
-        $column = $mod3 * 3;
-        $row = $blockNumber - $mod3;
-
-        return $this->getBlock($row, $column);
-    }
-
-    public function getBlock(Location $location): array
+    public function getBlockByLocation(Location $location): array
     {
         $firstCellInBlock = $this->getFirstCellInBlock($location);
         $block = [];
@@ -176,6 +160,11 @@ class Grid
         return $block;
     }
 
+    /**
+     * @param Location $location
+     *
+     * @return Location
+     */
     private function getFirstCellInBlock(Location $location): Location
     {
         $firstRowInBlock = $location->getRow() - $location->getRow() % 3;
@@ -184,6 +173,12 @@ class Grid
         return new Location($firstRowInBlock, $firstColumnInBlock);
     }
 
+    /**
+     * @param Location $location
+     *
+     * @return array
+     * @throws NoPossibilitiesException
+     */
     public function possibilitiesForCell(Location $location): array
     {
         if ($this->getCellValue($location) > 0) {
@@ -193,28 +188,46 @@ class Grid
             array_merge(
                 $this->getRow($location->getRow()),
                 $this->getColumn($location->getColumn()),
-                $this->getBlock($location)
+                $this->getBlockByLocation($location)
             )
         );
-        $array = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
-        // todo throw exception if no possibilities
-
-        return array_filter(array_values(array_diff($array, $impossibilities)));
+        return array_filter(array_values(array_diff(Cell::POSSIBLE_VALUES, $impossibilities)));
     }
 
+    /**
+     * @param Location $location
+     */
     public function emptyCell(Location $location): void
     {
-        $this->setCell($location, self::EMPTY_CELL);
+        $this->setCell($location, Cell::EMPTY_VALUE);
     }
 
+    /**
+     * @param $value
+     *
+     * @return bool
+     */
     private function isValid($value): bool
     {
         return $value >= 0 && $value <= 9;
     }
 
+    /**
+     * @param $location
+     *
+     * @return bool
+     */
     public function isEmpty($location): bool
     {
-        return $this->getCellValue($location) !== self::EMPTY_CELL;
+        return $this->getCell($location)->isEmpty();
+    }
+
+    /**
+     * @return Cell[]
+     */
+    public function getAllFilledCells(): array
+    {
+        return $this->cells;
     }
 }

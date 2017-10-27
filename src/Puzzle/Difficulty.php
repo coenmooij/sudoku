@@ -1,8 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CoenMooij\Sudoku\Puzzle;
 
-class Difficulty
+use CoenMooij\Sudoku\Exception\InvalidDifficultyException;
+
+final class Difficulty
 {
     public const VERY_EASY = 1;
     public const EASY = 2;
@@ -10,12 +14,53 @@ class Difficulty
     public const HARD = 4;
     public const LEGENDARY = 5;
 
-    // todo fix
-    const DIFFICULTY_LEVELS = [
-        ['level' => 1, 'holes' => 30, 'bound' => 5],
-        ['level' => 2, 'holes' => 40, 'bound' => 4],
-        ['level' => 3, 'holes' => 50, 'bound' => 3],
-        ['level' => 4, 'holes' => 60, 'bound' => 2],
-        ['level' => 5, 'holes' => 70, 'bound' => 0],
+    public const NUMBER_OF_HOLES_KEY = 'holes';
+    public const BOUND_KEY = 'bound';
+
+    private const LEVELS = [
+        self::VERY_EASY => [self::NUMBER_OF_HOLES_KEY => 30, self::BOUND_KEY => 5],
+        self::EASY => [self::NUMBER_OF_HOLES_KEY => 40, self::BOUND_KEY => 4],
+        self::NORMAL => [self::NUMBER_OF_HOLES_KEY => 50, self::BOUND_KEY => 3],
+        self::HARD => [self::NUMBER_OF_HOLES_KEY => 60, self::BOUND_KEY => 2],
+        self::LEGENDARY => [self::NUMBER_OF_HOLES_KEY => 70, self::BOUND_KEY => 0],
     ];
+
+    /**
+     * @var int
+     */
+    private $difficulty;
+
+    public function __construct(int $difficulty)
+    {
+        if (!isset(self::LEVELS[$difficulty])) {
+            throw new InvalidDifficultyException();
+        }
+        $this->difficulty = $difficulty;
+    }
+
+    /**
+     * @return int
+     */
+    public function getNumberOfHoles(): int
+    {
+        $this->getParameter(self::NUMBER_OF_HOLES_KEY);
+    }
+
+    /**
+     * @return int
+     */
+    public function getBound(): int
+    {
+        $this->getParameter(self::BOUND_KEY);
+    }
+
+    /**
+     * @param string $parameter
+     *
+     * @return int
+     */
+    private function getParameter(string $parameter): int
+    {
+        return self::LEVELS[$this->difficulty][$parameter];
+    }
 }
