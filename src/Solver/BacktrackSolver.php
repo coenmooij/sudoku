@@ -2,7 +2,10 @@
 
 namespace CoenMooij\Sudoku\Solver;
 
-use CoenMooij\Sudoku\Grid;
+use CoenMooij\Sudoku\Exception\UnsolvableException;
+use CoenMooij\Sudoku\Puzzle\Grid;
+use CoenMooij\Sudoku\Puzzle\Location;
+use CoenMooij\Sudoku\Validator\SudokuValidator;
 
 /**
  * BacktrackSolver - Informed depth first search.
@@ -37,20 +40,20 @@ class BacktrackSolver implements SudokuSolverInterface
     /**
      * @var Grid
      */
-    private $sudokuGrid;
+    private $grid;
 
     /**
-     * @var boolean
+     * @var bool
      */
     private $direction;
 
     /**
-     * @var integer
+     * @var int
      */
     private $row;
 
     /**
-     * @var integer
+     * @var int
      */
     private $column;
 
@@ -63,30 +66,28 @@ class BacktrackSolver implements SudokuSolverInterface
     }
 
     /**
-     * Solves the given grid.
-     *
-     * @param Grid $sudokuGrid The grid to solve.
+     * @param Grid $grid
      *
      * @return Grid
-     * @throws \CoenMooij\Sudoku\UnsolvableException
+     * @throws UnsolvableException
      */
-    public function solve(Grid $sudokuGrid): Grid
+    public function solve(Grid $grid): Grid
     {
-        $this->initializeSolveGrid($sudokuGrid);
+        $this->initializeSolveGrid($grid);
         while (!$this->reachedFinalCell()) {
-            if (!$this->locationIsValid()) {
+            if (!Grid::locationIsValid($this->getCurrentLocation())) {
                 throw new UnsolvableException();
             }
-            if (!$this->cellIsGiven()) {
+            if (!$this->cellWasGiven()) {
                 if ($this->getCurrentDirection() === self::DIRECTION_BACKWARDS) {
-                    if ($this->hasPossibilities()) {
+                    if ($this->currentLocationHasPossibilities()) {
                         $this->fillCell();
                     } else {
                         $this->emptyCell();
                     }
                 } else {
                     $this->findAndSetAllPossibilitiesForCurrentCell();
-                    if ($this->hasPossibilities()) {
+                    if ($this->currentLocationHasPossibilities()) {
                         $this->fillCell();
                     } else {
                         $this->emptyCell();
@@ -97,7 +98,7 @@ class BacktrackSolver implements SudokuSolverInterface
             $this->nextCell();
         }
 
-        return $this->reachedFinalCell() ? $sudokuGrid : false;
+        return $this->reachedFinalCell() ? $grid : false;
     }
 
     private function getCurrentDirection(): bool
@@ -111,7 +112,7 @@ class BacktrackSolver implements SudokuSolverInterface
      */
     private function emptyCell()
     {
-        $this->sudokuGrid->emptyCell(new GridLocation($this->row, $this->column));
+        $this->grid->emptyCell(new Location($this->row, $this->column));
     }
 
     private function reachedFinalCell(): bool
@@ -133,12 +134,11 @@ class BacktrackSolver implements SudokuSolverInterface
     }
 
     /**
-     * Checks whether the current cell has any possibilities.
-     * @return boolean
+     * @return bool
      */
-    private function hasPossibilities()
+    private function currentLocationHasPossibilities(): bool
     {
-        return !empty($this->possibilities[$this->row][$this->column]);
+        return !empty($this->getPossibilitiesFor($this->getCurrentLocation()));
     }
 
     /**
@@ -147,22 +147,8 @@ class BacktrackSolver implements SudokuSolverInterface
      */
     private function findAndSetAllPossibilitiesForCurrentCell(): void
     {
-        $possibilities = $this->sudokuGrid->possibilitiesForCell(new GridLocation($this->row, $this->column));
+        $possibilities = $this->getAllPossibilitiesForCell(new Location($this->row, $this->column));
         $this->possibilities[$this->row][$this->column] = $possibilities;
-    }
-
-    private function currentDirectionIsBackwards(): bool
-    {
-        return $this->direction === self::DIRECTION_BACKWARDS;
-    }
-
-    /**
-     * Checks whether our current location ($row, $column) is still a valid position.
-     * @return boolean
-     */
-    private function locationIsValid(): bool
-    {
-        return $this->column >= 0 && $this->column < 9 && $this->row >= 0 && $this->row < 9;
     }
 
     /**
@@ -170,12 +156,12 @@ class BacktrackSolver implements SudokuSolverInterface
      */
     private function nextCell(): void
     {
-        if ($this->direction == self::DIRECTION_FORWARD) {
-            $this->row = $this->column == 8 ? $this->row + 1 : $this->row;
-            $this->column = $this->column == 8 ? 0 : $this->column + 1;
+        if ($this->getCurrentDirection() === self::DIRECTION_FORWARD) {
+            $this->row = $this->column === 8 ? $this->row + 1 : $this->row;
+            $this->column = $this->column === 8 ? 0 : $this->column + 1;
         } else {
-            $this->row = $this->column == 0 ? $this->row - 1 : $this->row;
-            $this->column = $this->column == 0 ? 8 : $this->column - 1;
+            $this->row = $this->column === 0 ? $this->row - 1 : $this->row;
+            $this->column = $this->column === 0 ? 8 : $this->column - 1;
         }
     }
 
@@ -188,22 +174,40 @@ class BacktrackSolver implements SudokuSolverInterface
     {
         $possibilities = $this->possibilities[$this->row][$this->column];
         $value = $this->getRandomValue($possibilities);
-        $this->sudokuGrid->setCell($this->getCurrentLocation(), $value);
+        $this->grid->setCell($this->getCurrentLocation(), $value);
         $this->setPossibilitiesFor($this->getCurrentLocation(), array_values(array_diff($possibilities, [$value])));
         $this->direction = self::DIRECTION_FORWARD;
     }
 
-    private function getCurrentLocation(): GridLocation
+    private function getCurrentLocation(): Location
     {
-        return new GridLocation($this->row, $this->column);
+        return new Location($this->row, $this->column);
     }
 
-    private function getPossibilitiesFor(GridLocation $location): array
+    /**
+     * @param Location $location
+     *
+     * @return int[]
+     */
+    private function getAllPossibilitiesForCell(Location $location): array
+    {
+        $impossibilities = array_unique(
+            array_merge(
+                $this->grid->getRow($location->getRow()),
+                $this->grid->getColumn($location->getColumn()),
+                $this->grid->getBlock($location)
+            )
+        );
+
+        return array_values(array_diff(SudokuValidator::ALL_VALID_VALUES, $impossibilities));
+    }
+
+    private function getPossibilitiesFor(Location $location): array
     {
         return $this->possibilities[$location->getRow()][$location->getColumn()];
     }
 
-    private function setPossibilitiesFor(GridLocation $location, array $possibilities): void
+    private function setPossibilitiesFor(Location $location, array $possibilities): void
     {
         $this->possibilities[$location->getRow()][$location->getColumn()] = $possibilities;
     }
@@ -211,10 +215,10 @@ class BacktrackSolver implements SudokuSolverInterface
     private function initializeSolveGrid(Grid $sudokuGrid): void
     {
         $this->reset();
-        $this->sudokuGrid = $sudokuGrid;
+        $this->grid = $sudokuGrid;
         for ($row = 0; $row < 9; $row++) {
             for ($column = 0; $column < 9; $column++) {
-                $location = new GridLocation($row, $column);
+                $location = new Location($row, $column);
                 if ($this->isFilledIn($location)) {
                     $this->addGivenCell($location);
                 }
@@ -222,35 +226,38 @@ class BacktrackSolver implements SudokuSolverInterface
         }
     }
 
-    private function addGivenCell(GridLocation $location): void
+    /**
+     * @param Location $location
+     *
+     * @return bool
+     */
+    private function isFilledIn(Location $location): bool
+    {
+        return $this->grid->getCellValue($location) !== Grid::EMPTY_CELL;
+    }
+
+    /**
+     * @param int[] $values
+     *
+     * @return int
+     */
+    private function getRandomValue(array $values): int
+    {
+        return $values[random_int(1, count($values) - 1)];
+    }
+
+    /**
+     * @param Location $location
+     */
+    private function addGivenCell(Location $location): void
     {
         $this->givenCells[$location->getRow()][$location->getColumn()] = true;
     }
 
-    private function isFilledIn(GridLocation $location): bool
-    {
-        return $this->sudokuGrid->getCell($location) !== Grid::EMPTY_CELL;
-    }
-
     /**
-     * Selects a random value of an array of values.
-     *
-     * @param array $values The values.
-     *
-     * @return mixed
+     * @return bool
      */
-    private function getRandomValue(array $values)
-    {
-        $random = rand(1, count($values));
-
-        return $values[($random - 1)];
-    }
-
-    /**
-     * Checks if cell was given in original puzzle.
-     * @return boolean
-     */
-    private function cellIsGiven(): bool
+    private function cellWasGiven(): bool
     {
         return !empty($this->givenCells[$this->row][$this->column]);
     }

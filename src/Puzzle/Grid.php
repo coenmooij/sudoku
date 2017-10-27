@@ -2,12 +2,18 @@
 
 namespace CoenMooij\Sudoku\Puzzle;
 
+use CoenMooij\Sudoku\Parser\GridSerializer;
+
 /**
  * Class Grid
  */
 class Grid
 {
-    private const EMPTY_CELL = 0;
+    public const NUMBER_OF_ROWS = 9;
+    public const NUMBER_OF_COLUMNS = 9;
+    public const NUMBER_OF_BLOCKS = 9;
+    public const NUMBER_OF_CELLS = 81;
+    public const EMPTY_CELL = 0;
 
     /**
      * @var int[][]
@@ -15,11 +21,40 @@ class Grid
     private $grid;
 
     /**
+     * Todo : find better solution to calculate it without serializer
+     *
+     * @param Grid $grid
+     *
+     * @return int
+     */
+    public static function numberOfEmptyFields(Grid $grid): int
+    {
+        return substr_count(GridSerializer::serialize($grid), (string) Grid::EMPTY_CELL);
+    }
+
+    /**
+     * @param int $index
+     *
+     * @return Location
+     */
+    public static function getLocationByIndex(int $index): Location
+    {
+        $row = floor($index / Grid::NUMBER_OF_COLUMNS);
+        $column = $index % Grid::NUMBER_OF_ROWS;
+
+        return new Location($row, $column);
+    }
+
+    /**
+     * @param Cell[] $cells
      * Grid constructor.
      */
-    public function __construct()
+    public function __construct(array $cells = [])
     {
         $this->initializeEmptyGrid();
+        foreach ($cells as $cell) {
+            $this->setCell($cell->getLocation(), $cell->getValue());
+        }
     }
 
     /**
@@ -36,7 +71,18 @@ class Grid
         $this->grid = $grid;
     }
 
-    public function getCell(Location $location): int
+    /**
+     * @param $location
+     *
+     * @return bool
+     */
+    public static function locationIsValid(Location $location): bool
+    {
+        return $location->getRow() >= 0 && $location->getRow() < 9
+            && $location->getColumn() >= 0 && $location->getColumn() < 9;
+    }
+
+    public function getCellValue(Location $location): int
     {
         return $this->grid[$location->getRow()][$location->getColumn()];
     }
@@ -67,18 +113,6 @@ class Grid
         return $this->grid;
     }
 
-    public function getGridAsString(): string
-    {
-        $gridAsString = '';
-        foreach ($this->grid as $row) {
-            foreach ($row as $value) {
-                $gridAsString .= (string) $value;
-            }
-        }
-
-        return $gridAsString;
-    }
-
     /**
      * Returns given row of the grid.
      *
@@ -102,7 +136,7 @@ class Grid
     {
         $response = [];
         for ($row = 0; $row < 9; $row++) {
-            $response[] = $this->getCell($row, $column);
+            $response[] = $this->getCellValue($row, $column);
         }
 
         return $response;
@@ -130,7 +164,7 @@ class Grid
         $block = [];
         for ($row = 0; $row < 3; $row++) {
             for ($column = 0; $column < 3; $column++) {
-                $block[] = $this->getCell(
+                $block[] = $this->getCellValue(
                     new Location(
                         $firstCellInBlock->getRow() + $row,
                         $firstCellInBlock->getColumn() + $column
@@ -152,7 +186,7 @@ class Grid
 
     public function possibilitiesForCell(Location $location): array
     {
-        if ($this->getCell($location) > 0) {
+        if ($this->getCellValue($location) > 0) {
             throw new NoPossibilitiesException();
         }
         $impossibilities = array_unique(
@@ -181,6 +215,6 @@ class Grid
 
     public function isEmpty($location): bool
     {
-        return $this->getCell($location) !== self::EMPTY_CELL;
+        return $this->getCellValue($location) !== self::EMPTY_CELL;
     }
 }
