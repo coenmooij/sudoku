@@ -1,11 +1,11 @@
 <?php
 
-namespace CoenMooij\Sudoku;
+namespace CoenMooij\Sudoku\Puzzle;
 
 class Cell
 {
     /**
-     * @var GridLocation
+     * @var Location
      */
     private $location;
     /**
@@ -13,16 +13,16 @@ class Cell
      */
     private $value;
 
-    public function __construct(GridLocation $location, int $value)
+    public function __construct(Location $location, int $value)
     {
         $this->location = $location;
         $this->value = $value;
     }
 
     /**
-     * @return GridLocation
+     * @return Location
      */
-    public function getLocation(): GridLocation
+    public function getLocation(): Location
     {
         return $this->location;
     }

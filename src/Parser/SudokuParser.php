@@ -2,6 +2,8 @@
 
 namespace CoenMooij\Sudoku;
 
+use CoenMooij\Sudoku\Grid\Grid;
+
 /**
  * Class SudokuParser
  *
@@ -9,19 +11,17 @@ namespace CoenMooij\Sudoku;
 class SudokuParser
 {
     /**
-     * Parses the given sudoku string into a sudokuGrid object.
+     * @param string $string
      *
-     * @param string $string The sudoku in string form.
-     *
-     * @return SudokuGrid
+     * @return Grid
      */
-    public function parse(string $string)
+    public function parse(string $string): Grid
     {
         $grid = [];
         for ($i = 0; $i < 9; $i++) {
             $grid[$i] = $this->parseRow(substr($string, $i * 9, 9));
         }
-        $sudokuGrid = new SudokuGrid();
+        $sudokuGrid = new Grid();
         $sudokuGrid->setGrid($grid);
         return $sudokuGrid;
     }

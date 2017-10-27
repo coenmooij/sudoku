@@ -1,6 +1,6 @@
 <?php
 
-namespace CoenMooij\Sudoku;
+namespace CoenMooij\Sudoku\Generator;
 
 class PuzzleGenerator
 {
@@ -26,7 +26,7 @@ class PuzzleGenerator
 
     /**
      * The sudoku grid.
-     * @var SudokuGrid
+     * @var Grid
      */
     private $sudokuGrid;
 
@@ -47,12 +47,12 @@ class PuzzleGenerator
     /**
      * Generate a sudoku puzzle from a given solution.
      *
-     * @param SudokuGrid $sudokuGrid A full sudoku solution.
+     * @param Grid $sudokuGrid A full sudoku solution.
      * @param integer $difficulty The difficulty level.
      *
      * @return SudokuPuzzle
      */
-    public function generatePuzzle(SudokuGrid $sudokuGrid, $difficulty)
+    public function generatePuzzle(Grid $sudokuGrid, $difficulty)
     {
         $this->sudokuGrid = $sudokuGrid;
         $this->difficulty = $difficulty;
@@ -83,7 +83,7 @@ class PuzzleGenerator
         $numberOfHoles = self::DIFFICULTY_LEVELS[$this->difficulty - 1]['holes'];
         $bound = self::DIFFICULTY_LEVELS[$this->difficulty - 1]['bound'];
         for ($i = 0; $i < $numberOfHoles; $i++) {
-            $location = new GridLocation($this->stack[$i]['y'], $this->stack[$i]['x']);
+            $location = new Location($this->stack[$i]['y'], $this->stack[$i]['x']);
             if ($this->digConsultant->isDiggableAndUniquelySolvableAfterDigging($this->sudokuGrid, $location, $bound)) {
                 $this->sudokuGrid->emptyCell($location);
             }

@@ -1,50 +1,51 @@
 <?php
 
-namespace CoenMooij\Sudoku;
+namespace CoenMooij\Sudoku\Puzzle;
 
 /**
- * Class SudokuGrid
+ * Class Grid
  */
-class SudokuGrid
+class Grid
 {
-    const EMPTY_CELL = 0;
+    private const EMPTY_CELL = 0;
 
-    /** @var int[] */
+    /**
+     * @var int[][]
+     */
     private $grid;
 
     /**
-     * SudokuGrid constructor.
+     * Grid constructor.
      */
     public function __construct()
     {
-        $this->initializeGrid();
+        $this->initializeEmptyGrid();
     }
 
     /**
-     * Initializes the grid to empty fields.
      * @return void
      */
-    private function initializeGrid()
+    private function initializeEmptyGrid(): void
     {
         $grid = [];
         for ($i = 0; $i < 9; $i++) {
             for ($j = 0; $j < 9; $j++) {
-                $grid[$i][$j] = 0;
+                $grid[$i][$j] = self::EMPTY_CELL;
             }
         }
         $this->grid = $grid;
     }
 
-    public function setCell(GridLocation $location, int $value): void
+    public function getCell(Location $location): int
+    {
+        return $this->grid[$location->getRow()][$location->getColumn()];
+    }
+
+    public function setCell(Location $location, int $value): void
     {
         if ($this->isValid($value)) {
             $this->grid[$location->getRow()][$location->getColumn()] = $value;
         }
-    }
-
-    public function getCell(GridLocation $location): int
-    {
-        return $this->grid[$location->getRow()][$location->getColumn()];
     }
 
     /**
@@ -52,7 +53,7 @@ class SudokuGrid
      *
      * @param array $grid The new grid.
      */
-    public function setGrid($grid)
+    public function setGrid($grid): void
     {
         $this->grid = $grid;
     }
@@ -61,12 +62,12 @@ class SudokuGrid
      * Getter for the grid.
      * @return array
      */
-    public function getGrid()
+    public function getGrid(): Grid
     {
         return $this->grid;
     }
 
-    public function getGridAsString()
+    public function getGridAsString(): string
     {
         $gridAsString = '';
         foreach ($this->grid as $row) {
@@ -123,14 +124,14 @@ class SudokuGrid
         return $this->getBlock($row, $column);
     }
 
-    public function getBlock(GridLocation $location): array
+    public function getBlock(Location $location): array
     {
         $firstCellInBlock = $this->getFirstCellInBlock($location);
         $block = [];
         for ($row = 0; $row < 3; $row++) {
             for ($column = 0; $column < 3; $column++) {
                 $block[] = $this->getCell(
-                    new GridLocation(
+                    new Location(
                         $firstCellInBlock->getRow() + $row,
                         $firstCellInBlock->getColumn() + $column
                     )
@@ -141,18 +142,18 @@ class SudokuGrid
         return $block;
     }
 
-    private function getFirstCellInBlock(GridLocation $location): GridLocation
+    private function getFirstCellInBlock(Location $location): Location
     {
         $firstRowInBlock = $location->getRow() - $location->getRow() % 3;
         $firstColumnInBlock = $location->getColumn() - $location->getColumn() % 3;
 
-        return new GridLocation($firstRowInBlock, $firstColumnInBlock);
+        return new Location($firstRowInBlock, $firstColumnInBlock);
     }
 
-    public function possibilitiesForCell(GridLocation $location): array
+    public function possibilitiesForCell(Location $location): array
     {
         if ($this->getCell($location) > 0) {
-           throw new NoPossibilitiesException();
+            throw new NoPossibilitiesException();
         }
         $impossibilities = array_unique(
             array_merge(
@@ -168,7 +169,7 @@ class SudokuGrid
         return array_filter(array_values(array_diff($array, $impossibilities)));
     }
 
-    public function emptyCell(GridLocation $location): void
+    public function emptyCell(Location $location): void
     {
         $this->setCell($location, self::EMPTY_CELL);
     }

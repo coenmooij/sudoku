@@ -2,12 +2,12 @@
 
 namespace CoenMooij\Sudoku\Solver;
 
-use CoenMooij\Sudoku\SudokuGrid;
+use CoenMooij\Sudoku\Grid;
 
 /**
  * Interface SudokuSolver
  */
 interface SudokuSolverInterface
 {
-    public function solve(SudokuGrid $sudokuGrid);
+    public function solve(Grid $sudokuGrid);
 }

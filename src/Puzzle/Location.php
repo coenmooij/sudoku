@@ -1,8 +1,8 @@
 <?php
 
-namespace CoenMooij\Sudoku;
+namespace CoenMooij\Sudoku\Puzzle;
 
-class GridLocation
+class Location
 {
     /** @var int */
     private $row;

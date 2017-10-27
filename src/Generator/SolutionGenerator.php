@@ -1,6 +1,6 @@
 <?php
 
-namespace CoenMooij\Sudoku;
+namespace CoenMooij\Sudoku\Generator;
 
 /**
  * Class SolutionGenerator
@@ -11,7 +11,7 @@ class SolutionGenerator
     const NUMBER_OF_RANDOM_STARTERS = 11;
 
     /**
-     * @var SudokuGrid
+     * @var Grid
      */
     private $sudokuGrid;
 
@@ -26,10 +26,10 @@ class SolutionGenerator
         $this->validator = new SudokuValidator();
     }
 
-    public function generateSolution(): SudokuGrid
+    public function generateSolution(): Grid
     {
         do {
-            $this->sudokuGrid = new SudokuGrid();
+            $this->sudokuGrid = new Grid();
             $this->placeRandomStarters();
         } while (!$this->sudokuIsSolvable());
 
@@ -55,10 +55,10 @@ class SolutionGenerator
      * Returns a random currently empty cell.
      * @return array
      */
-    private function getRandomEmptyCell(): GridLocation
+    private function getRandomEmptyCell(): Location
     {
         do {
-            $location = new GridLocation(random_int(0, 8), random_int(0, 8));
+            $location = new Location(random_int(0, 8), random_int(0, 8));
         } while ($this->sudokuGrid->isEmpty($location));
 
         return $location;

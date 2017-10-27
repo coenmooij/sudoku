@@ -1,6 +1,6 @@
 <?php
 
-namespace CoenMooij\Sudoku;
+namespace CoenMooij\Sudoku\Exception;
 
 /**
  * Class UnsolvableException

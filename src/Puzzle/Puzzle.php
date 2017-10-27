@@ -1,27 +1,24 @@
 <?php
 
-namespace CoenMooij\Sudoku;
+namespace CoenMooij\Sudoku\Puzzle;
 
 /**
- * Class SudokuPuzzle
+ * Class Puzzle
  */
-class SudokuPuzzle
+class Puzzle
 {
     /**
-     * The puzzle.
-     *
      * @var array
      */
     private $puzzle;
 
-    public function __construct(SudokuGrid $sudokuGrid)
+    public function __construct(Grid $sudokuGrid)
     {
         $this->setGrid($sudokuGrid);
     }
 
     /**
      * Getter for the puzzle.
-     *
      * @return array
      */
     public function getPuzzle()
@@ -32,15 +29,15 @@ class SudokuPuzzle
     /**
      * Fills the puzzle with given grid.
      *
-     * @param SudokuGrid $sudokuGrid The sudoku grid.
+     * @param Grid $grid The sudoku grid.
      *
      * @return void
      */
-    private function setGrid(SudokuGrid $sudokuGrid)
+    private function setGrid(Grid $grid)
     {
         for ($row = 0; $row < 9; $row++) {
             for ($column = 0; $column < 9; $column++) {
-                $value = $sudokuGrid->getCell($row, $column);
+                $value = $grid->getCell($row, $column);
                 $this->puzzle[$row][$column] = [
                     'given' => $value > 0,
                     'value' => $value,
