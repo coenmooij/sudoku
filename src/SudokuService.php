@@ -4,7 +4,7 @@ namespace CoenMooij\Sudoku;
 
 use CoenMooij\Sudoku\Generator\PuzzleGenerator;
 use CoenMooij\Sudoku\Generator\SolutionGenerator;
-use CoenMooij\Sudoku\Parser\GridSerializer;
+use CoenMooij\Sudoku\Serializer\GridSerializer;
 use CoenMooij\Sudoku\Puzzle\Difficulty;
 use CoenMooij\Sudoku\Puzzle\Location;
 use CoenMooij\Sudoku\Puzzle\Puzzle;
@@ -35,8 +35,7 @@ class SudokuService
         SolutionGenerator $solutionGenerator,
         PuzzleGenerator $puzzleGenerator,
         BacktrackSolver $backtrackSolver,
-        SimpleSolver $simpleSolver,
-        GridSerializer $gridSerializer
+        SimpleSolver $simpleSolver
     ) {
         $this->puzzleGenerator = $puzzleGenerator;
         $this->solutionGenerator = $solutionGenerator;
@@ -73,7 +72,7 @@ class SudokuService
     {
         $solution = $this->solutionGenerator->generateSolution();
 
-        return $this->puzzleGenerator->generatePuzzle($solution, $difficulty);
+        return $this->puzzleGenerator->generate($solution, $difficulty);
     }
 
     public function puzzleIsValid(Puzzle $puzzle): bool

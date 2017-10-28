@@ -27,7 +27,7 @@ final class PuzzleGenerator
         $this->digValidator = $digValidator;
     }
 
-    public function generatePuzzle(Grid $solvedGrid, Difficulty $difficulty): Puzzle
+    public function generate(Grid $solvedGrid, Difficulty $difficulty): Puzzle
     {
         $this->grid = $solvedGrid;
         $locationList = $this->getRandomLocations($difficulty);

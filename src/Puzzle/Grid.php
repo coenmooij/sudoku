@@ -25,6 +25,11 @@ final class Grid
         $this->initializeGrid();
     }
 
+    public static function valueIsValid(int $value): bool
+    {
+        return in_array($value, self::POSSIBLE_VALUES, true);
+    }
+
     public function get(Location $location): int
     {
         return $this->grid[$location->getRow()][$location->getColumn()];
@@ -32,7 +37,7 @@ final class Grid
 
     public function set(Location $location, int $value): void
     {
-        if (!$this->valueIsValid($value)) {
+        if (!self::valueIsValid($value)) {
             throw new InvalidValueException();
         }
         $this->grid[$location->getRow()][$location->getColumn()] = $value;
@@ -173,8 +178,12 @@ final class Grid
     {
         $numberOfEmptyFields = 0;
         foreach ($this->getRows() as $row) {
-            $numberOfEmptyFields += array_count_values($row)[self::EMPTY_VALUE];
+            for ($i = 0; $i < self::NUMBER_OF_COLUMNS; $i++) {
+                $numberOfEmptyFields += ($row[$i] === self::EMPTY_VALUE);
+            }
         }
+
+        return $numberOfEmptyFields;
     }
 
     private function initializeGrid(): void
@@ -184,10 +193,5 @@ final class Grid
                 $this->empty(new Location($row, $column));
             }
         }
-    }
-
-    private function valueIsValid(int $value): bool
-    {
-        return in_array($value, self::POSSIBLE_VALUES, true);
     }
 }

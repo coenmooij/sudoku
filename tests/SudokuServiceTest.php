@@ -6,6 +6,10 @@ use PHPUnit\Framework\TestCase;
 
 class SudokuServiceTest extends TestCase
 {
+    public function setUp()
+    {
+    }
+    
     /**
      * @test
      */

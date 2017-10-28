@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace CoenMooij\Sudoku\Parser;
+namespace CoenMooij\Sudoku\Serializer;
 
 use CoenMooij\Sudoku\Puzzle\Grid;
 use CoenMooij\Sudoku\Puzzle\Location;
@@ -28,7 +28,10 @@ final class GridSerializer
         $grid = new Grid();
         for ($i = 0; $i < Grid::NUMBER_OF_LOCATIONS; $i++) {
             $location = self::getLocationByIndex($i);
-            $grid->set($location, $string[$i]);
+            $value = (int) $string[$i];
+            if (Grid::valueIsValid($value)) {
+                $grid->set($location, $value);
+            }
         }
 
         return $grid;
