@@ -11,7 +11,7 @@ use CoenMooij\Sudoku\Puzzle\Location;
 /**
  * Solves the given grid using only row, column, and block checks.
  */
-class SimpleSolver implements SudokuSolverInterface
+class SimpleSolver implements GridSolverInterface
 {
     /**
      * @var Grid
@@ -38,8 +38,9 @@ class SimpleSolver implements SudokuSolverInterface
         return $grid;
     }
 
-    public function hint(): Location
+    public function hint(Grid $grid): Location
     {
+        $this->grid = $grid;
         for ($row = 0; $row < Grid::NUMBER_OF_ROWS; $row++) {
             for ($column = 0; $column < Grid::NUMBER_OF_COLUMNS; $column++) {
                 $location = new Location($row, $column);

@@ -21,10 +21,10 @@ final class DigValidator
         $this->solver = $solver;
     }
 
-    public function isDiggableAndUniquelySolvableAfterDigging(Grid $sudokuGrid, Location $location, int $bound): bool
+    public function isDiggableAndUniquelySolvableAfterDigging(Grid $grid, Location $location, int $bound): bool
     {
-        return $this->isDiggable($sudokuGrid, $location, $bound)
-            && $this->isUniquelySolvableAfterDigging($sudokuGrid, $location);
+        return $this->isDiggable($grid, $location, $bound)
+            && $this->isUniquelySolvableAfterDigging($grid, $location);
     }
 
     private function isDiggable(Grid $grid, Location $location, int $bound): bool

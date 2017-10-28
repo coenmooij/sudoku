@@ -11,7 +11,7 @@ use CoenMooij\Sudoku\Puzzle\Location;
 /**
  * Informed depth first search.
  */
-class BacktrackSolver implements SudokuSolverInterface
+class BacktrackSolver implements GridSolverInterface
 {
     private const DIRECTION_FORWARDS = true;
     private const DIRECTION_BACKWARDS = false;

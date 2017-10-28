@@ -2,10 +2,15 @@
 
 namespace CoenMooij\Sudoku;
 
-use CoenMooij\Sudoku\Puzzle\Cell;
+use CoenMooij\Sudoku\Generator\PuzzleGenerator;
+use CoenMooij\Sudoku\Generator\SolutionGenerator;
+use CoenMooij\Sudoku\Parser\GridSerializer;
 use CoenMooij\Sudoku\Puzzle\Difficulty;
+use CoenMooij\Sudoku\Puzzle\Location;
 use CoenMooij\Sudoku\Puzzle\Puzzle;
+use CoenMooij\Sudoku\Solver\BacktrackSolver;
 use CoenMooij\Sudoku\Solver\SimpleSolver;
+use CoenMooij\Sudoku\Validator\GridValidator;
 
 class SudokuService
 {
@@ -13,71 +18,66 @@ class SudokuService
      * @var SimpleSolver
      */
     private $simpleSolver;
+    /**
+     * @var SolutionGenerator
+     */
+    private $solutionGenerator;
+    /**
+     * @var PuzzleGenerator
+     */
+    private $puzzleGenerator;
+    /**
+     * @var BacktrackSolver
+     */
+    private $backtrackSolver;
 
-    public function __construct(SimpleSolver $simpleSolver)
-    {
+    public function __construct(
+        SolutionGenerator $solutionGenerator,
+        PuzzleGenerator $puzzleGenerator,
+        BacktrackSolver $backtrackSolver,
+        SimpleSolver $simpleSolver,
+        GridSerializer $gridSerializer
+    ) {
+        $this->puzzleGenerator = $puzzleGenerator;
+        $this->solutionGenerator = $solutionGenerator;
+        $this->backtrackSolver = $backtrackSolver;
         $this->simpleSolver = $simpleSolver;
     }
 
-    public function hint(): Cell
+    public function hint(Puzzle $puzzle): Location
     {
-        // todo implement
+        return $this->simpleSolver->hint($puzzle->getGrid());
     }
 
-    public function simpleSolve(Puzzle $sudokuPuzzle): Puzzle
+    public function simpleSolve(Puzzle $puzzle): Puzzle
     {
-        // todo implement
+        $grid = $this->simpleSolver->solve($puzzle->getGrid());
+        $puzzle->setGrid($grid);
+
+        return $puzzle;
+    }
+
+    public function solve(Puzzle $puzzle): Puzzle
+    {
+        $grid = $this->simpleSolver->solve($puzzle->getGrid());
+
+        if ($grid->numberOfEmptyFields() > 0) {
+            $grid = $this->backtrackSolver->solve($grid);
+        }
+        $puzzle->setGrid($grid);
+
+        return $puzzle;
     }
 
     public function generatePuzzle(Difficulty $difficulty): Puzzle
     {
-        $solutionGenerator = new SolutionGenerator();
-        $solution = $solutionGenerator->generateSolution();
+        $solution = $this->solutionGenerator->generateSolution();
 
-        $puzzleGenerator = new PuzzleGenerator();
-        $puzzle = $puzzleGenerator->generatePuzzle($solution, $difficulty);
-
-        return response()->json(
-            [
-                'puzzle' => $puzzle->getPuzzle(),
-                'difficulty' => $difficulty
-            ]
-        );
+        return $this->puzzleGenerator->generatePuzzle($solution, $difficulty);
     }
 
-    /**
-     * Controller method for the GET /solutions endpoint.
-     * Checks if the solution is valid.
-     *
-     * @param Request $request The request.
-     *
-     * @return Response
-     */
-    public function checkSolution(Request $request)
+    public function puzzleIsValid(Puzzle $puzzle): bool
     {
-        $solution = $request->query('solution');
-        if (strlen($solution) != 81 || !is_numeric($solution)) {
-            throw new BadRequestHttpException('Invalid parameter `solution`.');
-        }
-        $sudokuParser = new SudokuParser();
-        $grid = $sudokuParser->parse($solution);
-
-        $validator = new SudokuValidator();
-        if ($validator->validate($grid)) {
-            $numberOfEmptyFields = Grid::numberOfEmptyFields($grid);
-            if ($numberOfEmptyFields > 0) {
-                $message = "Going great! You still have " . $numberOfEmptyFields . " cells to fill.";
-            } else {
-                $message = "Perfect! How about a new game?";
-            }
-        } else {
-            $message = "Oops! Looks like you made a mistake. Think you can find it without using reset?";
-        }
-
-        return response()->json(
-            [
-                'result' => $message
-            ]
-        );
+        GridValidator::gridIsValid($puzzle->getGrid());
     }
 }
