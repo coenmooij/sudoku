@@ -38,27 +38,16 @@ final class Difficulty
         $this->difficulty = $difficulty;
     }
 
-    /**
-     * @return int
-     */
     public function getNumberOfHoles(): int
     {
         $this->getParameter(self::NUMBER_OF_HOLES_KEY);
     }
 
-    /**
-     * @return int
-     */
     public function getBound(): int
     {
         $this->getParameter(self::BOUND_KEY);
     }
 
-    /**
-     * @param string $parameter
-     *
-     * @return int
-     */
     private function getParameter(string $parameter): int
     {
         return self::LEVELS[$this->difficulty][$parameter];

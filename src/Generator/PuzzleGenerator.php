@@ -4,16 +4,12 @@ declare(strict_types=1);
 
 namespace CoenMooij\Sudoku\Generator;
 
-use CoenMooij\Sudoku\Puzzle\Cell;
 use CoenMooij\Sudoku\Puzzle\Difficulty;
 use CoenMooij\Sudoku\Puzzle\Grid;
 use CoenMooij\Sudoku\Puzzle\Location;
 use CoenMooij\Sudoku\Puzzle\Puzzle;
 use CoenMooij\Sudoku\Validator\DigValidator;
 
-/**
- * Class PuzzleGenerator
- */
 final class PuzzleGenerator
 {
     /**
@@ -26,22 +22,11 @@ final class PuzzleGenerator
      */
     private $digValidator;
 
-    /**
-     * PuzzleGenerator constructor.
-     *
-     * @param DigValidator $digValidator
-     */
     public function __construct(DigValidator $digValidator)
     {
         $this->digValidator = $digValidator;
     }
 
-    /**
-     * @param Grid $solvedGrid
-     * @param Difficulty $difficulty
-     *
-     * @return Puzzle
-     */
     public function generatePuzzle(Grid $solvedGrid, Difficulty $difficulty): Puzzle
     {
         $this->grid = $solvedGrid;
@@ -54,7 +39,7 @@ final class PuzzleGenerator
     /**
      * @param Difficulty $difficulty
      *
-     * @return array|Location[]
+     * @return Location[]
      */
     private function getRandomLocations(Difficulty $difficulty): array
     {
@@ -65,33 +50,23 @@ final class PuzzleGenerator
                 $location = new Location(random_int(0, 8), random_int(0, 8));
             } while ($this->locationInList($location, $locationList));
 
-            $locationList[] = new Location(random_int(0, 8), random_int(0, 8));// todo fix bug of duplicates
+            $locationList[] = $location;
         }
 
         return $locationList;
     }
 
-    /**
-     * @param Difficulty $difficulty
-     * @param Location[] ...$locationList
-     */
     private function digLocations(Difficulty $difficulty, Location ...$locationList): void
     {
         $bound = $difficulty->getBound();
 
         foreach ($locationList as $location) {
             if ($this->digValidator->isDiggableAndUniquelySolvableAfterDigging($this->grid, $location, $bound)) {
-                $this->grid->setCell($location, Cell::EMPTY_VALUE);
+                $this->grid->set($location, Grid::EMPTY_VALUE);
             }
         }
     }
 
-    /**
-     * @param Location $needle
-     * @param Location[] $locationList
-     *
-     * @return bool
-     */
     private function locationInList(Location $needle, Location ...$locationList): bool
     {
         foreach ($locationList as $location) {

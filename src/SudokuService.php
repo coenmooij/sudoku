@@ -2,6 +2,11 @@
 
 namespace CoenMooij\Sudoku;
 
+use CoenMooij\Sudoku\Puzzle\Cell;
+use CoenMooij\Sudoku\Puzzle\Difficulty;
+use CoenMooij\Sudoku\Puzzle\Puzzle;
+use CoenMooij\Sudoku\Solver\SimpleSolver;
+
 class SudokuService
 {
     /**
@@ -24,7 +29,7 @@ class SudokuService
         // todo implement
     }
 
-    public function generatePuzzle(Difficulty $difficulty)
+    public function generatePuzzle(Difficulty $difficulty): Puzzle
     {
         $solutionGenerator = new SolutionGenerator();
         $solution = $solutionGenerator->generateSolution();

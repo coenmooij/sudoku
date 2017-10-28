@@ -4,24 +4,30 @@ declare(strict_types=1);
 
 namespace CoenMooij\Sudoku\Solver;
 
+use CoenMooij\Sudoku\Exception\UnsolvableException;
 use CoenMooij\Sudoku\Puzzle\Grid;
 use CoenMooij\Sudoku\Puzzle\Location;
 
 /**
- * Solves the given sudoku using only row, column, and block checks.
- * Class SimpleSolver
+ * Solves the given grid using only row, column, and block checks.
  */
 class SimpleSolver implements SudokuSolverInterface
 {
+    /**
+     * @var Grid
+     */
+    private $grid;
+
     public function solve(Grid $grid): Grid
     {
-        for ($row = 0; $row < 9; $row++) {
-            for ($column = 0; $column < 9; $column++) {
+        $this->grid = $grid;
+        for ($row = 0; $row < Grid::NUMBER_OF_ROWS; $row++) {
+            for ($column = 0; $column < Grid::NUMBER_OF_COLUMNS; $column++) {
                 $location = new Location($row, $column);
-                if ($grid->getCellValue($location) === 0) {
-                    $opportunities = $grid->possibilitiesForCell($location);
-                    if (count($opportunities) === 1) {
-                        $grid->setCell($location, $opportunities[0]);
+                if ($this->grid->isEmpty($location)) {
+                    $possibleValues = $this->grid->getAllPossibilitiesFor($location);
+                    if (count($possibleValues) === 1) {
+                        $grid->set($location, $possibleValues[$row][$column][0]);
                         $column = 0;
                         $row = 0;
                     }
@@ -30,5 +36,25 @@ class SimpleSolver implements SudokuSolverInterface
         }
 
         return $grid;
+    }
+
+    public function hint(): Location
+    {
+        for ($row = 0; $row < Grid::NUMBER_OF_ROWS; $row++) {
+            for ($column = 0; $column < Grid::NUMBER_OF_COLUMNS; $column++) {
+                $location = new Location($row, $column);
+                if ($this->hasOnePossibleValue($location)) {
+                    return $location;
+                }
+            }
+        }
+        throw new UnsolvableException();
+    }
+
+    public function hasOnePossibleValue(Location $location): bool
+    {
+        $possibleValues = $this->grid->getAllPossibilitiesFor($location);
+
+        return count($possibleValues) === 1;
     }
 }

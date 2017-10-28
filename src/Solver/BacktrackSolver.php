@@ -5,45 +5,31 @@ declare(strict_types=1);
 namespace CoenMooij\Sudoku\Solver;
 
 use CoenMooij\Sudoku\Exception\UnsolvableException;
-use CoenMooij\Sudoku\Puzzle\Cell;
 use CoenMooij\Sudoku\Puzzle\Grid;
 use CoenMooij\Sudoku\Puzzle\Location;
-use CoenMooij\Sudoku\Validator\GridValidator;
 
 /**
- * BacktrackSolver - Informed depth first search.
- * The solver will traverse the grid ltr-ttb.
- * Ignores any 'given' cells.
- * For each empty cell it encounters:
- * 1. Gets the possibilities.
- * 2. Randomly fills one of those in.
- * 3. Continues until it reaches the end (solved) or
- *    encounters a cell that has no possibilities
- * 4. Go back to the previous cell with multiple possibilities,
- *    and choose another one from the random stack of options
- * Class BacktrackSolver
+ * Informed depth first search.
  */
 class BacktrackSolver implements SudokuSolverInterface
 {
-    private const DIRECTION_FORWARD = true;
+    private const DIRECTION_FORWARDS = true;
     private const DIRECTION_BACKWARDS = false;
-
-    /**
-     * A list of the original given cells of the sudoku puzzle.
-     * @var array
-     */
-    private $givenCells;
-
-    /**
-     * A matrix with for each cell a list of possibilities or 'false' if none.
-     * @var array
-     */
-    private $possibilities;
 
     /**
      * @var Grid
      */
     private $grid;
+
+    /**
+     * @var int[][][]
+     */
+    private $possibleValues;
+
+    /**
+     * @var bool[][]
+     */
+    private $presetValues;
 
     /**
      * @var bool
@@ -60,105 +46,86 @@ class BacktrackSolver implements SudokuSolverInterface
      */
     private $column;
 
-    /**
-     * BacktrackSolver constructor.
-     */
-    public function __construct()
-    {
-        $this->reset();
-    }
-
-    /**
-     * @param Grid $grid
-     *
-     * @return Grid
-     * @throws UnsolvableException
-     */
     public function solve(Grid $grid): Grid
     {
-        $this->initializeSolveGrid($grid);
-        while (!$this->reachedFinalCell()) {
-            if (!Grid::locationIsValid($this->getCurrentLocation())) {
-                throw new UnsolvableException();
+        $this->initialize($grid);
+
+        while ($this->locationIsValid()) {
+            if (!$this->isPresetValue()) {
+                $this->direction === self::DIRECTION_FORWARDS
+                    ? $this->handleForwardsIteration()
+                    : $this->handleBackwardsIteration();
             }
-            if (!$this->cellWasGiven()) {
-                if ($this->getCurrentDirection() === self::DIRECTION_BACKWARDS) {
-                    if ($this->currentLocationHasPossibilities()) {
-                        $this->fillCell();
-                    } else {
-                        $this->emptyCurrentCell();
-                    }
-                } else {
-                    $this->findAndSetAllPossibilitiesForCurrentCell();
-                    if ($this->currentLocationHasPossibilities()) {
-                        $this->fillCell();
-                    } else {
-                        $this->emptyCurrentCell();
-                        $this->direction = self::DIRECTION_BACKWARDS;
-                    }
-                }
-            }
-            $this->nextCell();
+            $this->nextLocation();
+        }
+        if (!$this->reachedEndOfGrid()) {
+            throw new UnsolvableException();
         }
 
-        return $this->reachedFinalCell() ? $grid : false;
+        return $grid;
     }
 
-    private function getCurrentDirection(): bool
+    private function handleForwardsIteration(): void
     {
-        return $this->direction;
+        $this->findAllPossibleValuesForCurrentLocation();
+        if ($this->currentLocationHasPossibleValues()) {
+            $this->fillCurrentLocationWithNextPossibleValue();
+        } else {
+            $this->grid->empty($this->getCurrentLocation());
+            $this->direction = self::DIRECTION_BACKWARDS;
+        }
     }
 
-    /**
-     * @return void
-     */
-    private function emptyCurrentCell(): void
+    private function handleBackwardsIteration(): void
     {
-        $this->grid->setCell($this->getCurrentLocation(), Cell::EMPTY_VALUE);
+        if ($this->currentLocationHasPossibleValues()) {
+            $this->fillCurrentLocationWithNextPossibleValue();
+            $this->direction = self::DIRECTION_FORWARDS;
+        } else {
+            $this->grid->empty($this->getCurrentLocation());
+        }
     }
 
-    private function reachedFinalCell(): bool
+    private function initialize(Grid $grid): void
     {
-        return $this->row === 9 && $this->column === 0;
-    }
-
-    /**
-     * Resets the class variables.
-     * @return void
-     */
-    private function reset()
-    {
-        $this->possibilities = [];
-        $this->givenCells = [];
-        $this->direction = self::DIRECTION_FORWARD;
+        $this->direction = self::DIRECTION_FORWARDS;
         $this->column = 0;
         $this->row = 0;
+        $this->grid = $grid;
+        $this->possibleValues = [];
+        $this->presetValues = [];
+        $this->initializePresetValues();
     }
 
-    /**
-     * @return bool
-     */
-    private function currentLocationHasPossibilities(): bool
+    private function initializePresetValues(): void
     {
-        return !empty($this->getPossibilitiesFor($this->getCurrentLocation()));
+        for ($row = 0; $row < 9; $row++) {
+            for ($column = 0; $column < 9; $column++) {
+                $location = new Location($row, $column);
+                if ($this->grid->isEmpty($location)) {
+                    $this->presetValues[$row][$column] = false;
+                } else {
+                    $this->presetValues[$row][$column] = true;
+                }
+            }
+        }
     }
 
-    /**
-     * Gets all possible fields from the grid for the current cell.
-     * @return void
-     */
-    private function findAndSetAllPossibilitiesForCurrentCell(): void
+    private function currentLocationHasPossibleValues(): bool
     {
-        $possibilities = $this->getAllPossibilitiesForCell(new Location($this->row, $this->column));
-        $this->possibilities[$this->row][$this->column] = $possibilities;
+        return !empty($this->possibleValues[$this->row][$this->column]);
     }
 
-    /**
-     * Moves the row and column pointer 1 forward or backwards based on the current direction.
-     */
-    private function nextCell(): void
+    private function findAllPossibleValuesForCurrentLocation(): void
     {
-        if ($this->getCurrentDirection() === self::DIRECTION_FORWARD) {
+        $possibilities = $this->grid->getAllPossibilitiesFor(new Location($this->row, $this->column));
+        shuffle($possibilities);
+        $this->possibleValues[$this->row][$this->column] = $possibilities;
+    }
+
+    private function nextLocation(): void
+    {
+        if ($this->direction === self::DIRECTION_FORWARDS) {
             $this->row = $this->column === 8 ? $this->row + 1 : $this->row;
             $this->column = $this->column === 8 ? 0 : $this->column + 1;
         } else {
@@ -167,18 +134,10 @@ class BacktrackSolver implements SudokuSolverInterface
         }
     }
 
-    /**
-     * Fills a cell with a random choice of one of its possibilities.
-     * Then sets direction to forward.
-     * @return void
-     */
-    private function fillCell(): void
+    private function fillCurrentLocationWithNextPossibleValue(): void
     {
-        $possibilities = $this->possibilities[$this->row][$this->column];
-        $value = $this->getRandomValue($possibilities);
-        $this->grid->setCell($this->getCurrentLocation(), $value);
-        $this->setPossibilitiesFor($this->getCurrentLocation(), array_values(array_diff($possibilities, [$value])));
-        $this->direction = self::DIRECTION_FORWARD;
+        $this->grid->set($this->getCurrentLocation(), $this->possibleValues[$this->row][$this->column][0]);
+        array_shift($this->possibleValues[$this->row][$this->column]);
     }
 
     private function getCurrentLocation(): Location
@@ -186,81 +145,18 @@ class BacktrackSolver implements SudokuSolverInterface
         return new Location($this->row, $this->column);
     }
 
-    /**
-     * @param Location $location
-     *
-     * @return int[]
-     */
-    private function getAllPossibilitiesForCell(Location $location): array
+    private function isPresetValue(): bool
     {
-        $impossibilities = array_unique(
-            array_merge(
-                $this->grid->getRow($location->getRow()),
-                $this->grid->getColumn($location->getColumn()),
-                $this->grid->getBlockByLocation($location)
-            )
-        );
-
-        return array_values(array_diff(GridValidator::ALL_VALID_VALUES, $impossibilities));
+        return !empty($this->presetValues[$this->row][$this->column]);
     }
 
-    private function getPossibilitiesFor(Location $location): array
+    private function locationIsValid(): bool
     {
-        return $this->possibilities[$location->getRow()][$location->getColumn()];
+        return $this->row >= 0 && $this->row < 9;
     }
 
-    private function setPossibilitiesFor(Location $location, array $possibilities): void
+    private function reachedEndOfGrid(): bool
     {
-        $this->possibilities[$location->getRow()][$location->getColumn()] = $possibilities;
-    }
-
-    private function initializeSolveGrid(Grid $sudokuGrid): void
-    {
-        $this->reset();
-        $this->grid = $sudokuGrid;
-        for ($row = 0; $row < 9; $row++) {
-            for ($column = 0; $column < 9; $column++) {
-                $location = new Location($row, $column);
-                if ($this->isFilledIn($location)) {
-                    $this->addGivenCell($location);
-                }
-            }
-        }
-    }
-
-    /**
-     * @param Location $location
-     *
-     * @return bool
-     */
-    private function isFilledIn(Location $location): bool
-    {
-        return $this->grid->getCellValue($location) !== Cell::EMPTY_VALUE;
-    }
-
-    /**
-     * @param int[] $values
-     *
-     * @return int
-     */
-    private function getRandomValue(array $values): int
-    {
-        return $values[random_int(1, count($values) - 1)];
-    }
-
-    /**
-     * @param Location $location
-     */
-    private function addGivenCell(Location $location): void
-    {
-        $this->givenCells[$location->getRow()][$location->getColumn()] = true;
-    }
-
-    /**
-     * @return bool
-     */
-    private function cellWasGiven(): bool
-    {
-        return !empty($this->givenCells[$this->row][$this->column]);
+        return $this->row > 8;
     }
 }

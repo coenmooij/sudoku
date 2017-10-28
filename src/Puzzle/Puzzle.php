@@ -4,47 +4,51 @@ declare(strict_types=1);
 
 namespace CoenMooij\Sudoku\Puzzle;
 
-/**
- * Class Puzzle
- */
 final class Puzzle
 {
     /**
      * @var Grid
      */
     private $grid;
+
     /**
-     * @var Cell[]
+     * @var Location[]
      */
-    private $givenCells;
+    private $presetLocations;
 
     public function __construct(Grid $grid)
     {
         $this->grid = $grid;
-        $this->givenCells = $this->grid->getAllFilledCells();
+        $this->initializePresetLocations();
     }
 
-    /**
-     * @return Grid
-     */
     public function getGrid(): Grid
     {
         return $this->grid;
     }
 
-    /**
-     * @param Grid $grid
-     */
     public function setGrid(Grid $grid): void
     {
         $this->grid = $grid;
     }
 
     /**
-     * @return Cell[]
+     * @return Location[]
      */
-    public function getGivenCells(): array
+    public function getPresetLocations(): array
     {
-        return $this->givenCells;
+        return $this->presetLocations;
+    }
+
+    private function initializePresetLocations(): void
+    {
+        for ($row = 0; $row < Grid::NUMBER_OF_ROWS; $row++) {
+            for ($column = 0; $column < Grid::NUMBER_OF_COLUMNS; $column++) {
+                $location = new Location($row, $column);
+                if (!$this->grid->isEmpty($location)) {
+                    $this->presetLocations[] = $location;
+                }
+            }
+        }
     }
 }

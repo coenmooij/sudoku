@@ -4,29 +4,15 @@ declare(strict_types=1);
 
 namespace CoenMooij\Sudoku\Validator;
 
-use CoenMooij\Sudoku\Puzzle\Cell;
 use CoenMooij\Sudoku\Puzzle\Grid;
 
-/**
- * Class SudokuValidator
- */
 final class GridValidator
 {
-    /**
-     * @param Grid $grid
-     *
-     * @return bool
-     */
     public static function gridIsValid(Grid $grid): bool
     {
         return self::columnsAreValid($grid) && self::rowsAreValid($grid) && self::blocksAreValid($grid);
     }
 
-    /**
-     * @param Grid $grid
-     *
-     * @return bool
-     */
     public static function rowsAreValid(Grid $grid): bool
     {
         for ($i = 0; $i < Grid::NUMBER_OF_ROWS; $i++) {
@@ -38,12 +24,6 @@ final class GridValidator
 
         return true;
     }
-
-    /**
-     * @param Grid $grid
-     *
-     * @return bool
-     */
     public static function columnsAreValid(Grid $grid): bool
     {
         for ($i = 0; $i < Grid::NUMBER_OF_COLUMNS; $i++) {
@@ -55,14 +35,9 @@ final class GridValidator
         return true;
     }
 
-    /**
-     * @param Grid $grid
-     *
-     * @return bool
-     */
     public static function blocksAreValid(Grid $grid): bool
     {
-        foreach ($grid->getAllBlocks() as $block) {
+        foreach ($grid->getBlocks() as $block) {
             if (self::hasDuplicates($block)) {
                 return false;
             }
@@ -72,13 +47,13 @@ final class GridValidator
     }
 
     /**
-     * @param array $values
+     * @param int[] $values
      *
      * @return bool
      */
     private static function hasDuplicates(array $values): bool
     {
-        $values = array_diff($values, [Cell::EMPTY_VALUE]);
+        $values = array_diff($values, [Grid::EMPTY_VALUE]);
 
         return count(array_count_values($values)) !== count($values);
     }

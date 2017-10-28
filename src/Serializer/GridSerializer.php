@@ -4,48 +4,41 @@ declare(strict_types=1);
 
 namespace CoenMooij\Sudoku\Parser;
 
-use CoenMooij\Sudoku\Puzzle\Cell;
 use CoenMooij\Sudoku\Puzzle\Grid;
+use CoenMooij\Sudoku\Puzzle\Location;
 use LengthException;
 
-/**
- * Class GridSerializer
- */
 final class GridSerializer
 {
-    /**
-     * @param Grid $grid
-     *
-     * @return string
-     */
     public static function serialize(Grid $grid): string
     {
         $string = '';
-        for ($i = 0; $i < Grid::NUMBER_OF_CELLS; $i++) {
-            $string .= (string) $grid->getCellValue(Grid::getLocationByIndex($i));
+        for ($i = 0; $i < Grid::NUMBER_OF_LOCATIONS; $i++) {
+            $string .= (string) $grid->get(self::getLocationByIndex($i));
         }
 
         return $string;
     }
 
-    /**
-     * @param string $string
-     *
-     * @return Grid
-     * @throws LengthException
-     */
     public static function deserialize(string $string): Grid
     {
-        if (strlen($string) !== Grid::NUMBER_OF_CELLS) {
+        if (strlen($string) !== Grid::NUMBER_OF_LOCATIONS) {
             throw new LengthException();
         }
-        $cells = [];
-
-        for ($i = 0; $i < Grid::NUMBER_OF_CELLS; $i++) {
-            $location = Grid::getLocationByIndex($i);
-            $cells[] = new Cell($location, $string[$i]);
+        $grid = new Grid();
+        for ($i = 0; $i < Grid::NUMBER_OF_LOCATIONS; $i++) {
+            $location = self::getLocationByIndex($i);
+            $grid->set($location, $string[$i]);
         }
 
-        return new Grid($cells);
+        return $grid;
+    }
+
+    public static function getLocationByIndex(int $index): Location
+    {
+        $row = (int) floor($index / Grid::NUMBER_OF_COLUMNS);
+        $column = $index % Grid::NUMBER_OF_ROWS;
+
+        return new Location($row, $column);
     }
 }
