@@ -27,7 +27,7 @@ class SimpleSolver implements GridSolverInterface
                 if ($this->grid->isEmpty($location)) {
                     $possibleValues = $this->grid->getAllPossibilitiesFor($location);
                     if (count($possibleValues) === 1) {
-                        $grid->set($location, $possibleValues[$row][$column][0]);
+                        $grid->set($location, $possibleValues[0]);
                         $column = 0;
                         $row = 0;
                     }
