@@ -86,7 +86,7 @@ class SudokuService
 
     public function generatePuzzle(Difficulty $difficulty): Puzzle
     {
-        $solution = $this->solutionGenerator->generateSolution();
+        $solution = $this->solutionGenerator->generate();
 
         return $this->puzzleGenerator->generate($solution, $difficulty);
     }

@@ -1,8 +1,7 @@
 <?php
 
-namespace Generator;
+namespace CoenMooij\Sudoku\Generator;
 
-use CoenMooij\Sudoku\Generator\HintGenerator;
 use CoenMooij\Sudoku\Puzzle\Grid;
 use CoenMooij\Sudoku\Puzzle\Location;
 use CoenMooij\Sudoku\Serializer\GridSerializer;

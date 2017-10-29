@@ -29,7 +29,7 @@ final class SolutionGenerator
         $this->solver = $solver;
     }
 
-    public function generateSolution(): Grid
+    public function generate(): Grid
     {
         do {
             $this->grid = new Grid();
