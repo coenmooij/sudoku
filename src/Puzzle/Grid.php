@@ -153,6 +153,9 @@ final class Grid
      */
     public function getAllPossibilitiesFor(Location $location): array
     {
+        if (!$this->isEmpty($location)) {
+            return [];
+        }
         $impossibleValues = array_unique(
             array_merge(
                 $this->getRow($location->getRow()),

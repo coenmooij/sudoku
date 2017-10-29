@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace CoenMooij\Sudoku\Solver;
 
-use CoenMooij\Sudoku\Exception\UnsolvableException;
 use CoenMooij\Sudoku\Puzzle\Grid;
 use CoenMooij\Sudoku\Puzzle\Location;
 
@@ -36,26 +35,5 @@ class SimpleSolver implements GridSolverInterface
         }
 
         return $grid;
-    }
-
-    public function hint(Grid $grid): Location
-    {
-        $this->grid = $grid;
-        for ($row = 0; $row < Grid::NUMBER_OF_ROWS; $row++) {
-            for ($column = 0; $column < Grid::NUMBER_OF_COLUMNS; $column++) {
-                $location = new Location($row, $column);
-                if ($this->hasOnePossibleValue($location)) {
-                    return $location;
-                }
-            }
-        }
-        throw new UnsolvableException();
-    }
-
-    public function hasOnePossibleValue(Location $location): bool
-    {
-        $possibleValues = $this->grid->getAllPossibilitiesFor($location);
-
-        return count($possibleValues) === 1;
     }
 }
