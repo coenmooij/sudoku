@@ -2,9 +2,9 @@
 
 namespace CoenMooij\Sudoku;
 
+use CoenMooij\Sudoku\Generator\HintGenerator;
 use CoenMooij\Sudoku\Generator\PuzzleGenerator;
 use CoenMooij\Sudoku\Generator\SolutionGenerator;
-use CoenMooij\Sudoku\Serializer\GridSerializer;
 use CoenMooij\Sudoku\Puzzle\Difficulty;
 use CoenMooij\Sudoku\Puzzle\Location;
 use CoenMooij\Sudoku\Puzzle\Puzzle;
@@ -30,22 +30,38 @@ class SudokuService
      * @var BacktrackSolver
      */
     private $backtrackSolver;
+    /**
+     * @var HintGenerator
+     */
+    private $hintGenerator;
 
     public function __construct(
+        HintGenerator $hintGenerator,
         SolutionGenerator $solutionGenerator,
         PuzzleGenerator $puzzleGenerator,
         BacktrackSolver $backtrackSolver,
         SimpleSolver $simpleSolver
     ) {
+        $this->hintGenerator = $hintGenerator;
         $this->puzzleGenerator = $puzzleGenerator;
         $this->solutionGenerator = $solutionGenerator;
         $this->backtrackSolver = $backtrackSolver;
         $this->simpleSolver = $simpleSolver;
     }
 
-    public function hint(Puzzle $puzzle): Location
+    public function getHint(Puzzle $puzzle): Location
     {
-        return $this->simpleSolver->hint($puzzle->getGrid());
+        return $this->hintGenerator->generateOne($puzzle->getGrid());
+    }
+
+    /**
+     * @param Puzzle $puzzle
+     *
+     * @return Location[]
+     */
+    public function getHints(Puzzle $puzzle): array
+    {
+        return $this->hintGenerator->generateAll($puzzle->getGrid());
     }
 
     public function simpleSolve(Puzzle $puzzle): Puzzle

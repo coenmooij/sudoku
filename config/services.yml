@@ -2,10 +2,14 @@ services:
     coenmooij.sudoku.service.sudoku:
         class: CoenMooij\Sudoku\SudokuService
         arguments:
+            - '@coenmooij.sudoku.generator.hint'
             - '@coenmooij.sudoku.generator.solution'
             - '@coenmooij.sudoku.generator.puzzle'
             - '@coenmooij.sudoku.solver.backtrack'
             - '@coenmooij.sudoku.solver.simple'
+
+    coenmooij.sudoku.generator.solution:
+        class: CoenMooij\Sudoku\Generator\HintGenerator
 
     coenmooij.sudoku.generator.solution:
         class: CoenMooij\Sudoku\Generator\SolutionGenerator
