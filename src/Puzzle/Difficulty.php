@@ -40,12 +40,12 @@ class Difficulty
 
     public function getNumberOfHoles(): int
     {
-        $this->getParameter(self::NUMBER_OF_HOLES_KEY);
+        return $this->getParameter(self::NUMBER_OF_HOLES_KEY);
     }
 
     public function getBound(): int
     {
-        $this->getParameter(self::BOUND_KEY);
+        return $this->getParameter(self::BOUND_KEY);
     }
 
     private function getParameter(string $parameter): int
