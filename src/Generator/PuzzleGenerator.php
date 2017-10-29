@@ -27,9 +27,9 @@ final class PuzzleGenerator
         $this->digValidator = $digValidator;
     }
 
-    public function generate(Grid $solvedGrid, Difficulty $difficulty): Puzzle
+    public function generate(Grid $solutionGrid, Difficulty $difficulty): Puzzle
     {
-        $this->grid = $solvedGrid;
+        $this->grid = $solutionGrid;
         $locationList = $this->getRandomLocations($difficulty);
         $this->digLocations($difficulty, ...$locationList);
 
@@ -48,7 +48,7 @@ final class PuzzleGenerator
         for ($i = 0; $i < $numberOfHoles; $i++) {
             do {
                 $location = new Location(random_int(0, 8), random_int(0, 8));
-            } while ($this->locationInList($location, $locationList));
+            } while ($this->locationInList($location, ...$locationList));
 
             $locationList[] = $location;
         }
@@ -62,7 +62,7 @@ final class PuzzleGenerator
 
         foreach ($locationList as $location) {
             if ($this->digValidator->isDiggableAndUniquelySolvableAfterDigging($this->grid, $location, $bound)) {
-                $this->grid->set($location, Grid::EMPTY_VALUE);
+                $this->grid->empty($location);
             }
         }
     }

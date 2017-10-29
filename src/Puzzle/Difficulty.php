@@ -6,7 +6,7 @@ namespace CoenMooij\Sudoku\Puzzle;
 
 use CoenMooij\Sudoku\Exception\InvalidDifficultyException;
 
-final class Difficulty
+class Difficulty
 {
     public const VERY_EASY = 1;
     public const EASY = 2;
