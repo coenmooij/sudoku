@@ -177,16 +177,16 @@ final class Grid
         $this->grid[$location->getRow()][$location->getColumn()] = self::EMPTY_VALUE;
     }
 
-    public function numberOfEmptyFields(): int
+    public function numberOfEmptyValues(): int
     {
-        $numberOfEmptyFields = 0;
+        $numberOfEmptyValues = 0;
         foreach ($this->getRows() as $row) {
             for ($i = 0; $i < self::NUMBER_OF_COLUMNS; $i++) {
-                $numberOfEmptyFields += ($row[$i] === self::EMPTY_VALUE);
+                $numberOfEmptyValues += ($row[$i] === self::EMPTY_VALUE);
             }
         }
 
-        return $numberOfEmptyFields;
+        return $numberOfEmptyValues;
     }
 
     private function initializeGrid(): void

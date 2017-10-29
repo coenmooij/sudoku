@@ -25,7 +25,7 @@ class SolutionGeneratorTest extends TestCase
     public function generate(): void
     {
         $grid = $this->generator->generate();
-        self::assertEquals(0, $grid->numberOfEmptyFields());
+        self::assertEquals(0, $grid->numberOfEmptyValues());
         self::assertTrue(GridValidator::gridIsValid($grid));
     }
 }

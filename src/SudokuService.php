@@ -76,7 +76,7 @@ class SudokuService
     {
         $grid = $this->simpleSolver->solve($puzzle->getGrid());
 
-        if ($grid->numberOfEmptyFields() > 0) {
+        if ($grid->numberOfEmptyValues() > 0) {
             $grid = $this->backtrackSolver->solve($grid);
         }
         $puzzle->setGrid($grid);

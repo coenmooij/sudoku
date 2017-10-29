@@ -38,13 +38,13 @@ class PuzzleGeneratorTest extends TestCase
     public function generate_simple(): void
     {
         $solutionGrid = GridSerializer::deserialize(self::SOLUTION_GRID);
-        self::assertEquals(0, $solutionGrid->numberOfEmptyFields());
+        self::assertEquals(0, $solutionGrid->numberOfEmptyValues());
 
         $this->difficultyMock->shouldReceive('getNumberOfHoles')->once()->andReturn(1);
         $this->difficultyMock->shouldReceive('getBound')->once()->andReturn(8);
 
         $puzzle = $this->generator->generate($solutionGrid, $this->difficultyMock);
-        self::assertEquals(1, $puzzle->getGrid()->numberOfEmptyFields());
+        self::assertEquals(1, $puzzle->getGrid()->numberOfEmptyValues());
         self::assertCount(80, $puzzle->getPresetLocations());
     }
 
@@ -54,13 +54,13 @@ class PuzzleGeneratorTest extends TestCase
     public function generate_complicated(): void
     {
         $solutionGrid = GridSerializer::deserialize(self::SOLUTION_GRID);
-        self::assertEquals(0, $solutionGrid->numberOfEmptyFields());
+        self::assertEquals(0, $solutionGrid->numberOfEmptyValues());
 
         $this->difficultyMock->shouldReceive('getNumberOfHoles')->once()->andReturn(81);
         $this->difficultyMock->shouldReceive('getBound')->once()->andReturn(1);
 
         $puzzle = $this->generator->generate($solutionGrid, $this->difficultyMock);
-        self::assertGreaterThan(9, $puzzle->getGrid()->numberOfEmptyFields());
+        self::assertGreaterThan(9, $puzzle->getGrid()->numberOfEmptyValues());
         self::assertGreaterThan(16, $puzzle->getPresetLocations());
     }
 }

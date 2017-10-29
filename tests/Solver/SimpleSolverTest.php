@@ -28,6 +28,6 @@ final class SimpleSolverTest extends TestCase
         $solvedGrid = $this->simpleSolver->solve($grid);
 
         self::assertTrue(GridValidator::gridIsValid($solvedGrid));
-        self::assertEquals(0, $solvedGrid->numberOfEmptyFields());
+        self::assertEquals(0, $solvedGrid->numberOfEmptyValues());
     }
 }
