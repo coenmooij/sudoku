@@ -46,6 +46,11 @@ class PuzzleServiceTest extends TestCase
      */
     private $simpleSolverMock;
 
+    /**
+     * @var Puzzle
+     */
+    private $puzzle;
+
     public function setUp(): void
     {
         $this->hintGeneratorMock = Mockery::mock(HintGenerator::class);
@@ -60,6 +65,9 @@ class PuzzleServiceTest extends TestCase
             $this->backtrackSolverMock,
             $this->simpleSolverMock
         );
+
+        $grid = new Grid();
+        $this->puzzle = new Puzzle($grid);
     }
 
     /**
@@ -67,12 +75,26 @@ class PuzzleServiceTest extends TestCase
      */
     public function getHint(): void
     {
-        $grid = new Grid();
-        $puzzle = new Puzzle($grid);
         $location = new Location(0, 0);
         $this->hintGeneratorMock->shouldReceive('generateOne')->once()->andReturn($location);
-        $hint = $this->service->getHint($puzzle);
+        $hint = $this->service->getHint($this->puzzle);
 
         self::assertTrue(Location::match($location, $hint));
+    }
+
+    /**
+     * @test
+     */
+    public function getHints(): void
+    {
+        $locationList = [
+            new Location(0, 0),
+            new Location(4, 6),
+            new Location(7, 2)
+        ];
+        $this->hintGeneratorMock->shouldReceive('generateAll')->once()->andReturn($locationList);
+        $hints = $this->service->getHints($this->puzzle);
+
+        self::assertEquals($locationList, $hints);
     }
 }
