@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace CoenMooij\Sudoku\Puzzle;
 
-final class Puzzle
+class Puzzle
 {
     /**
      * @var Grid

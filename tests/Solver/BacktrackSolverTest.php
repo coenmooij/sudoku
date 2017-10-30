@@ -6,7 +6,7 @@ use CoenMooij\Sudoku\Serializer\GridSerializer;
 use CoenMooij\Sudoku\Validator\GridValidator;
 use PHPUnit\Framework\TestCase;
 
-final class BacktrackSolverTest extends TestCase
+class BacktrackSolverTest extends TestCase
 {
     private const VERY_HARD_SUDOKU_AS_STRING = '004060002805002030000030060028000000000004000700050009002001000070040950600000040';
     /**

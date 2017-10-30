@@ -8,7 +8,7 @@ use CoenMooij\Sudoku\Exception\UnsolvableException;
 use CoenMooij\Sudoku\Puzzle\Grid;
 use CoenMooij\Sudoku\Puzzle\Location;
 
-final class HintGenerator
+class HintGenerator
 {
     public function generateOne(Grid $grid): Location
     {

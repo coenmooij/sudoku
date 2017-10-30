@@ -9,7 +9,7 @@ use CoenMooij\Sudoku\Puzzle\Grid;
 use CoenMooij\Sudoku\Puzzle\Location;
 use CoenMooij\Sudoku\Solver\BacktrackSolver;
 
-final class DigValidator
+class DigValidator
 {
     /**
      * @var BacktrackSolver

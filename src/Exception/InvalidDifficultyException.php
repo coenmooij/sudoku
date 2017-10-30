@@ -2,6 +2,6 @@
 
 namespace CoenMooij\Sudoku\Exception;
 
-final class InvalidDifficultyException extends SudokuException
+class InvalidDifficultyException extends SudokuException
 {
 }

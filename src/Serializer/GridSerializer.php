@@ -8,7 +8,7 @@ use CoenMooij\Sudoku\Puzzle\Grid;
 use CoenMooij\Sudoku\Puzzle\Location;
 use LengthException;
 
-final class GridSerializer
+class GridSerializer
 {
     public static function serialize(Grid $grid): string
     {

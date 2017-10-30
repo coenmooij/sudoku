@@ -2,6 +2,6 @@
 
 namespace CoenMooij\Sudoku\Exception;
 
-final class InvalidLocationException extends SudokuException
+class InvalidLocationException extends SudokuException
 {
 }

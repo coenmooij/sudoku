@@ -10,7 +10,7 @@ use CoenMooij\Sudoku\Puzzle\Location;
 use CoenMooij\Sudoku\Puzzle\Puzzle;
 use CoenMooij\Sudoku\Validator\DigValidator;
 
-final class PuzzleGenerator
+class PuzzleGenerator
 {
     /**
      * @var Grid

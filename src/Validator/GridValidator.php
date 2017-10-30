@@ -6,7 +6,7 @@ namespace CoenMooij\Sudoku\Validator;
 
 use CoenMooij\Sudoku\Puzzle\Grid;
 
-final class GridValidator
+class GridValidator
 {
     public static function gridIsValid(Grid $grid): bool
     {

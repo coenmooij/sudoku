@@ -7,7 +7,7 @@ namespace CoenMooij\Sudoku\Puzzle;
 /**
  * Class Location
  */
-final class Location
+class Location
 {
     /**
      * @var int

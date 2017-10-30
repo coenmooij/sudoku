@@ -10,7 +10,7 @@ use CoenMooij\Sudoku\Puzzle\Location;
 use CoenMooij\Sudoku\Solver\BacktrackSolver;
 use CoenMooij\Sudoku\Validator\GridValidator;
 
-final class SolutionGenerator
+class SolutionGenerator
 {
     const NUMBER_OF_RANDOM_STARTERS = 11;
 

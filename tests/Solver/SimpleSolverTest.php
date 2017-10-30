@@ -6,7 +6,7 @@ use CoenMooij\Sudoku\Serializer\GridSerializer;
 use CoenMooij\Sudoku\Validator\GridValidator;
 use PHPUnit\Framework\TestCase;
 
-final class SimpleSolverTest extends TestCase
+class SimpleSolverTest extends TestCase
 {
     private const EASY = '820345701194728605753190402001879023289050106037610840068901057975200310000087964';
     /**

@@ -6,7 +6,7 @@ namespace CoenMooij\Sudoku\Puzzle;
 
 use CoenMooij\Sudoku\Exception\InvalidValueException;
 
-final class Grid
+class Grid
 {
     public const NUMBER_OF_ROWS = 9;
     public const NUMBER_OF_COLUMNS = 9;

@@ -12,7 +12,7 @@ use CoenMooij\Sudoku\Solver\BacktrackSolver;
 use CoenMooij\Sudoku\Solver\SimpleSolver;
 use CoenMooij\Sudoku\Validator\GridValidator;
 
-class SudokuService
+class PuzzleService
 {
     /**
      * @var SimpleSolver
@@ -43,8 +43,8 @@ class SudokuService
         SimpleSolver $simpleSolver
     ) {
         $this->hintGenerator = $hintGenerator;
-        $this->puzzleGenerator = $puzzleGenerator;
         $this->solutionGenerator = $solutionGenerator;
+        $this->puzzleGenerator = $puzzleGenerator;
         $this->backtrackSolver = $backtrackSolver;
         $this->simpleSolver = $simpleSolver;
     }

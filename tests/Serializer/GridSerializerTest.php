@@ -6,7 +6,7 @@ use CoenMooij\Sudoku\Puzzle\Grid;
 use CoenMooij\Sudoku\Puzzle\Location;
 use PHPUnit\Framework\TestCase;
 
-final class GridSerializerTest extends TestCase
+class GridSerializerTest extends TestCase
 {
     private const SERIALIZED_GRID = '004060002000000000000000000000000000000000000000050000000000000000000000000000040';
     private const LOCATION_VALUE_PAIRS = [
