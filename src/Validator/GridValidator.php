@@ -13,7 +13,7 @@ final class GridValidator
         return self::columnsAreValid($grid) && self::rowsAreValid($grid) && self::blocksAreValid($grid);
     }
 
-    public static function rowsAreValid(Grid $grid): bool
+    private static function rowsAreValid(Grid $grid): bool
     {
         for ($i = 0; $i < Grid::NUMBER_OF_ROWS; $i++) {
             $row = $grid->getRow($i);
@@ -24,7 +24,8 @@ final class GridValidator
 
         return true;
     }
-    public static function columnsAreValid(Grid $grid): bool
+
+    private static function columnsAreValid(Grid $grid): bool
     {
         for ($i = 0; $i < Grid::NUMBER_OF_COLUMNS; $i++) {
             if (self::hasDuplicates($grid->getColumn($i))) {
@@ -35,7 +36,7 @@ final class GridValidator
         return true;
     }
 
-    public static function blocksAreValid(Grid $grid): bool
+    private static function blocksAreValid(Grid $grid): bool
     {
         foreach ($grid->getBlocks() as $block) {
             if (self::hasDuplicates($block)) {
