@@ -12,12 +12,13 @@ class HintGenerator
 {
     public function generateOne(Grid $grid): Location
     {
-        foreach ($this->getLocations() as $location) {
-            if ($this->hasOnePossibleValue($grid, $location)) {
-                return $location;
-            }
+        $locationList = $this->generateAll($grid);
+        if (empty($locationList)) {
+            throw new UnsolvableException();
         }
-        throw new UnsolvableException();
+        shuffle($locationList);
+
+        return $locationList[0];
     }
 
     /**

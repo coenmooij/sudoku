@@ -36,7 +36,8 @@ class HintGeneratorTest extends TestCase
     public function generateOne(): void
     {
         $location = $this->generator->generateOne($this->grid);
-        self::assertTrue(Location::match($location, new Location(0, 2)));
+        $rawLocation = [$location->getRow(), $location->getColumn()];
+        self::assertTrue(in_array($rawLocation, self::LOCATIONS, true));
     }
 
     /**
