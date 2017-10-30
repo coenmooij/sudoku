@@ -29,11 +29,10 @@ class DigValidator
 
     private function isDiggable(Grid $grid, Location $location, int $bound): bool
     {
-        return !$grid->isEmpty($location) && ($bound <= 0 || (
-                    $this->rowIsDiggable($grid, $location, $bound)
-                    && $this->columnIsDiggable($grid, $location, $bound)
-                    && $this->blockIsDiggable($grid, $location, $bound))
-            );
+        return !$grid->isEmpty($location)
+            && $this->rowIsDiggable($grid, $location, $bound)
+            && $this->columnIsDiggable($grid, $location, $bound)
+            && $this->blockIsDiggable($grid, $location, $bound);
     }
 
     private function isUniquelySolvableAfterDigging(Grid $grid, Location $location): bool
