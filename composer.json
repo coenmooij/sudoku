@@ -3,6 +3,7 @@
     "description": "Sudoku package for generating, validating and solving sudoku puzzles",
     "type": "library",
     "license": "MIT",
+    "version": "0.2.3",
     "authors": [
         {
             "name": "Coen Mooij",
