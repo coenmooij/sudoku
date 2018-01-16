@@ -12,7 +12,7 @@ use CoenMooij\Sudoku\Solver\BacktrackSolver;
 use CoenMooij\Sudoku\Solver\SimpleSolver;
 use CoenMooij\Sudoku\Validator\GridValidator;
 
-class PuzzleService
+class SudokuService
 {
     /**
      * @var SimpleSolver

@@ -6,6 +6,9 @@ To use this package, simply run `composer require coenmooij/sudoku`.
 
 ## Usage
 
+### SudokuService
+Exposes the main functionality of the library in a service.
+
 ### Solvers
 
 #### BacktrackSolver

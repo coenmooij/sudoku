@@ -14,10 +14,10 @@ use Mockery;
 use Mockery\MockInterface;
 use PHPUnit\Framework\TestCase;
 
-class PuzzleServiceTest extends TestCase
+class SudokuServiceTest extends TestCase
 {
     /**
-     * @var PuzzleService
+     * @var SudokuService
      */
     private $service;
 
@@ -58,7 +58,7 @@ class PuzzleServiceTest extends TestCase
         $this->puzzleGeneratorMock = Mockery::mock(PuzzleGenerator::class);
         $this->backtrackSolverMock = Mockery::mock(BacktrackSolver::class);
         $this->simpleSolverMock = Mockery::mock(SimpleSolver::class);
-        $this->service = new PuzzleService(
+        $this->service = new SudokuService(
             $this->hintGeneratorMock,
             $this->solutionGeneratorMock,
             $this->puzzleGeneratorMock,
