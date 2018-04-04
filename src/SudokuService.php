@@ -55,8 +55,6 @@ class SudokuService
     }
 
     /**
-     * @param Puzzle $puzzle
-     *
      * @return Location[]
      */
     public function getHints(Puzzle $puzzle): array

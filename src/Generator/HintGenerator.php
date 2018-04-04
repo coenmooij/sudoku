@@ -22,8 +22,6 @@ class HintGenerator
     }
 
     /**
-     * @param Grid $grid
-     *
      * @return Location[]
      */
     public function generateAll(Grid $grid): array

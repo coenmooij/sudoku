@@ -37,8 +37,6 @@ class PuzzleGenerator
     }
 
     /**
-     * @param Difficulty $difficulty
-     *
      * @return Location[]
      */
     private function getRandomLocations(Difficulty $difficulty): array

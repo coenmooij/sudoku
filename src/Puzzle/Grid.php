@@ -57,8 +57,6 @@ class Grid
     }
 
     /**
-     * @param int $row
-     *
      * @return int[]
      */
     public function getRow(int $row): array
@@ -80,8 +78,6 @@ class Grid
     }
 
     /**
-     * @param int $column
-     *
      * @return int[]
      */
     public function getColumn(int $column): array
@@ -108,8 +104,6 @@ class Grid
     }
 
     /**
-     * @param int $block
-     *
      * @return int[]
      */
     public function getBlock(int $block): array
@@ -121,8 +115,6 @@ class Grid
     }
 
     /**
-     * @param Location $location
-     *
      * @return int[]
      */
     public function getBlockAt(Location $location): array
@@ -147,8 +139,6 @@ class Grid
     }
 
     /**
-     * @param Location $location
-     *
      * @return int[]
      */
     public function getAllPossibilitiesFor(Location $location): array

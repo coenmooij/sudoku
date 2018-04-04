@@ -40,9 +40,6 @@ class GridSerializerTest extends TestCase
     /**
      * @test
      * @dataProvider dataProvider
-     *
-     * @param Location $location
-     * @param int $value
      */
     public function deserialize(Location $location, int $value): void
     {
