@@ -64,8 +64,8 @@ class SudokuService
 
     public function simpleSolve(Puzzle $puzzle): Puzzle
     {
-        $grid = $this->simpleSolver->solve($puzzle->getGrid());
-        $puzzle->setGrid($grid);
+        $solvedGrid = $this->simpleSolver->solve($puzzle->getGrid());
+        $puzzle->setGrid($solvedGrid);
 
         return $puzzle;
     }
