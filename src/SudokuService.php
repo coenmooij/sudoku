@@ -91,6 +91,6 @@ class SudokuService
 
     public function puzzleIsValid(Puzzle $puzzle): bool
     {
-        GridValidator::gridIsValid($puzzle->getGrid());
+        return GridValidator::gridIsValid($puzzle->getGrid());
     }
 }
